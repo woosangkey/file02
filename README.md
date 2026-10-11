@@ -20,3 +20,9 @@
 
 `book/채권투자_실무가이드.pdf` — 중급(1부) · 상급(2부) · 하이엔드 판매자(3부) 12장 + 부록(공식집·용어사전·종합문제).
 원고는 `book/chapters/*.json`, 재생성은 `python3 scripts/build_book.py`.
+
+## 채권투자 365일 학습 과정 (제안)
+
+- `study/채권투자_365일_학습과정_제안서.pdf` — 과정 설계, 연간 로드맵, 평가 체계, 제작 방안, 365일 일차별 커리큘럼
+- `study/pdf/Day001.pdf`, `Day006.pdf` — 샘플 교재 (학습일 / 실전 드릴, 각 10쪽)
+- 원고: `study/syllabus/m01~m12.json`, `study/days/dayNNN.json` · 재생성: `python3 scripts/build_study.py`
