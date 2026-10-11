@@ -1,5 +1,5 @@
 """Render content/*.json into styled Korean PDF reports (reportlab + matplotlib)."""
-import io, json, sys, glob, os
+import io, json, sys, glob, os, re
 from datetime import date
 import matplotlib
 matplotlib.use("Agg")
@@ -37,9 +37,9 @@ def styles(accent):
     s["body"] = ParagraphStyle("body", fontName="Nanum", fontSize=10, leading=16.5, alignment=TA_JUSTIFY,
                                spaceAfter=6, wordWrap="CJK")
     s["h1"] = ParagraphStyle("h1", fontName="NanumEB", fontSize=17, leading=23, textColor=colors.HexColor(accent),
-                             spaceBefore=4, spaceAfter=10)
+                             spaceBefore=4, spaceAfter=10, keepWithNext=1)
     s["h2"] = ParagraphStyle("h2", fontName="NanumB", fontSize=12.5, leading=18, textColor=colors.HexColor("#222222"),
-                             spaceBefore=10, spaceAfter=5)
+                             spaceBefore=10, spaceAfter=5, keepWithNext=1)
     s["bullet"] = ParagraphStyle("bullet", parent=s["body"], leftIndent=12, bulletIndent=2, spaceAfter=3)
     s["cell"] = ParagraphStyle("cell", fontName="Nanum", fontSize=8.6, leading=12, wordWrap="CJK")
     s["cellh"] = ParagraphStyle("cellh", fontName="NanumB", fontSize=8.8, leading=12, textColor=colors.white,
@@ -64,7 +64,7 @@ def fmt(text):
 
 def chart_image(b, accent, width):
     kind = b.get("kind", "line")
-    fig, ax = plt.subplots(figsize=(7.2, 3.4), dpi=160)
+    fig, ax = plt.subplots(figsize=(7.2, 3.0), dpi=160)
     x = b.get("x", [])
     series = b.get("series", {})
     cols = [accent] + [c for c in PALETTE if c.lower() != accent.lower()]
@@ -110,11 +110,11 @@ def chart_image(b, accent, width):
         if b.get("ylabel"):
             (ax.set_xlabel if kind == "barh" else ax.set_ylabel)(b["ylabel"], fontsize=9)
         if len(series) > 1:
-            ax.legend(fontsize=8.5, frameon=False)
+            ax.legend(fontsize=8, frameon=False, loc="upper left", bbox_to_anchor=(1.01, 1))
     ax.set_title(b.get("title", ""), fontsize=11, fontweight="bold", loc="left")
     fig.tight_layout()
     buf = io.BytesIO(); fig.savefig(buf, format="png"); plt.close(fig); buf.seek(0)
-    img = Image(buf, width=width, height=width * 3.4 / 7.2)
+    img = Image(buf, width=width, height=width * 3.0 / 7.2)
     return img
 
 
@@ -226,6 +226,8 @@ def build(json_path, out_dir):
         story.append(Paragraph(fmt(p), s["bullet"], bulletText="▪"))
     story.append(Spacer(1, 14))
     story.append(Paragraph("목차", s["h1"]))
+    for sec in d["sections"]:
+        sec["heading"] = re.sub(r"^\s*\d+[.)]\s*", "", sec["heading"])
     for i, sec in enumerate(d["sections"], 1):
         story.append(Paragraph(f"{i}.&nbsp;&nbsp;{fmt(sec['heading'])}", s["toc"]))
     for i, sec in enumerate(d["sections"], 1):
