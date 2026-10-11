@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>슬램덩크 일본어 365</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fbf7f2; --surface: #ffffff; --surface-2: #f3ece3; --text: #1f1a17; --muted: #6f655d;
+  --line: #e4dacd; --accent: #d1342f; --accent-ink: #ffffff; --accent-soft: #fbe3e1;
+  --ok: #1f8a4c; --ok-soft: #dff3e7; --warn: #b26a00;
+  --radius: 14px; --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15120f; --surface: #1f1b17; --surface-2: #2a241f; --text: #f1ebe4; --muted: #a99f95;
+    --line: #3a322b; --accent: #ff5a4f; --accent-ink: #1a0b0a; --accent-soft: #3a1f1c;
+    --ok: #4cc782; --ok-soft: #173325; --warn: #f0a640; --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15120f; --surface: #1f1b17; --surface-2: #2a241f; --text: #f1ebe4; --muted: #a99f95;
+  --line: #3a322b; --accent: #ff5a4f; --accent-ink: #1a0b0a; --accent-soft: #3a1f1c;
+  --ok: #4cc782; --ok-soft: #173325; --warn: #f0a640; --shadow: none;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.6 "Noto Sans KR", "Noto Sans JP", system-ui, sans-serif;
+}
+.ja { font-family: "Noto Sans JP", system-ui, sans-serif; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 16px 16px 80px; }
+header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.brand { font-weight: 700; font-size: 18px; letter-spacing: -.01em; }
+.brand b { color: var(--accent); }
+.stats { color: var(--muted); font-size: 13px; text-align: right; }
+.bar { height: 6px; background: var(--surface-2); border-radius: 99px; overflow: hidden; margin: 4px 0 16px; }
+.bar > i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin: 12px 0; box-shadow: var(--shadow); }
+.card h2 { font-size: 15px; margin: 0 0 10px; color: var(--muted); font-weight: 700; letter-spacing: .02em; }
+.card h3 { font-size: 15px; margin: 14px 0 6px; }
+
+.daynav { display: flex; align-items: center; gap: 8px; }
+.daynav .title { flex: 1; min-width: 0; text-align: center; }
+.daynav .title .d { font-size: 22px; font-weight: 700; }
+.daynav .title .s { color: var(--muted); font-size: 13px; }
+button, select, input, textarea { font: inherit; color: inherit; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 8px 12px; cursor: pointer; min-height: 40px; }
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+.btn.sm { padding: 4px 10px; min-height: 32px; font-size: 14px; }
+.btn.icon { width: 40px; padding: 0; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toggles { display: flex; flex-wrap: wrap; gap: 12px 16px; font-size: 14px; color: var(--muted); align-items: center; }
+.toggles label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+input[type=range] { width: 110px; accent-color: var(--accent); }
+
+.tag { display: inline-block; background: var(--accent-soft); color: var(--accent); border-radius: 99px; padding: 2px 10px; font-size: 12px; font-weight: 700; }
+.scene { color: var(--muted); border-left: 3px solid var(--accent); padding-left: 12px; margin: 8px 0; }
+
+.tasks { list-style: none; padding: 0; margin: 0; }
+.tasks li { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--line); }
+.tasks li:last-child { border-bottom: 0; }
+.tasks input { width: 20px; height: 20px; margin-top: 3px; accent-color: var(--ok); flex: none; }
+.tasks li.done span { color: var(--muted); text-decoration: line-through; }
+
+.item { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.item:last-child { border-bottom: 0; }
+.item .body { flex: 1; min-width: 0; }
+.item .jp { font-family: "Noto Sans JP", sans-serif; font-size: 18px; }
+.item .yomi { color: var(--muted); font-size: 13px; font-family: "Noto Sans JP", sans-serif; }
+.item .ko { font-size: 14px; }
+.item .who { flex: none; width: 64px; font-size: 13px; font-weight: 700; color: var(--accent); padding-top: 4px; font-family: "Noto Sans JP", sans-serif; }
+.item.mine { background: var(--accent-soft); border-radius: 10px; padding: 8px; }
+.item.now { outline: 2px solid var(--accent); border-radius: 10px; }
+.say { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface-2); cursor: pointer; font-size: 15px; }
+.say:hover { background: var(--accent-soft); }
+.hide-yomi .yomi { display: none; }
+.hide-ko .ko { display: none; }
+.blur { filter: blur(6px); cursor: pointer; transition: filter .2s; user-select: none; }
+.blur.shown { filter: none; user-select: auto; }
+
+details { margin-top: 8px; }
+details summary { cursor: pointer; color: var(--accent); font-weight: 700; font-size: 14px; }
+textarea { width: 100%; min-height: 110px; border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 10px; font-family: "Noto Sans JP", "Noto Sans KR", sans-serif; }
+input[type=text], input[type=date], select { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 8px 10px; min-height: 40px; max-width: 100%; }
+.dict { display: flex; gap: 8px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+.dict input { flex: 1; min-width: 160px; font-family: "Noto Sans JP", sans-serif; }
+.res { font-size: 14px; width: 100%; }
+.res.ok { color: var(--ok); } .res.ng { color: var(--warn); }
+
+.year { display: grid; grid-template-columns: repeat(14, 1fr); gap: 3px; margin-top: 8px; }
+.year button { aspect-ratio: 1; border: 0; border-radius: 3px; background: var(--surface-2); cursor: pointer; padding: 0; min-height: 0; }
+.year button.done { background: var(--ok); }
+.year button.part { background: var(--ok-soft); }
+.year button.cur { outline: 2px solid var(--accent); }
+.legend { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.warn { background: var(--accent-soft); color: var(--text); border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+.muted { color: var(--muted); font-size: 14px; }
+.complete { background: var(--ok-soft); color: var(--ok); font-weight: 700; text-align: center; border-radius: 10px; padding: 10px; }
+footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">🏀 <b>슬램덩크</b> 일본어 365</div>
+    <div class="stats" id="stats"></div>
+  </header>
+  <div class="bar"><i id="bar"></i></div>
+
+  <div class="card">
+    <div class="daynav">
+      <button class="btn icon" id="prev" aria-label="이전 날">◀</button>
+      <div class="title"><div class="d" id="dTitle"></div><div class="s" id="dSub"></div></div>
+      <button class="btn icon" id="next" aria-label="다음 날">▶</button>
+    </div>
+    <div class="row" style="justify-content:center;margin-top:10px">
+      <button class="btn sm" id="todayBtn">오늘로</button>
+      <select id="weekSel" aria-label="주차 선택"></select>
+    </div>
+  </div>
+
+  <div id="voiceWarn"></div>
+  <main id="main"></main>
+
+  <div class="card">
+    <h2>설정</h2>
+    <div class="toggles">
+      <label><input type="checkbox" id="tYomi" checked> 읽는 법(히라가나)</label>
+      <label><input type="checkbox" id="tKo" checked> 한국어 뜻</label>
+      <label>속도 <input type="range" id="rate" min="0.5" max="1.2" step="0.05" value="0.85"> <span id="rateV"></span></label>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <label class="muted" for="startDate">학습 시작일</label>
+      <input type="date" id="startDate">
+      <span class="muted">→ 시작일을 넣으면 매일 그날 분량이 자동으로 열립니다.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>1년 진도표</h2>
+    <div class="year" id="year"></div>
+    <div class="legend">한 줄 = 2주 · 진한 초록 = 완료 · 연한 초록 = 일부 완료 · 칸을 누르면 그날로 이동</div>
+  </div>
+
+  <footer>대화문은 학습용으로 새로 창작한 것입니다. 『SLAM DUNK』의 저작권은 井上雄彦 / 集英社에 있습니다.</footer>
+</div>
+
+<script src="app/data.js"></script>
+<script>
+(() => {
+  const C = window.COURSE;
+  const W = C.weeks;
+  const LAST = 365;
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  // ---------- storage (안전하게) ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("sd365:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem("sd365:" + k, JSON.stringify(v)); } catch {} },
+  };
+  let progress = store.get("progress", {});   // { day: [bool, ...] }
+  const notes = store.get("notes", {});         // { key: text }
+  const selfcheck = store.get("selfcheck", {}); // { week: {speak, listen, write} }
+
+  // ---------- 음성 ----------
+  let voices = [];
+  const pickVoice = () => voices.find((v) => v.lang === "ja-JP" && /Google|Kyoko|Otoya|Nanami|Haruka/.test(v.name)) || voices.find((v) => /^ja/.test(v.lang));
+  function loadVoices() {
+    if (!("speechSynthesis" in window)) return;
+    voices = speechSynthesis.getVoices();
+    const warn = $("#voiceWarn");
+    warn.innerHTML = voices.length && !pickVoice()
+      ? `<div class="card warn">이 기기에 일본어 음성이 없습니다. 휴대폰/PC 설정 → 언어 → 텍스트 음성 변환에서 <b>일본어</b> 음성을 설치하면 듣기 기능을 쓸 수 있어요.</div>` : "";
+  }
+  if ("speechSynthesis" in window) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+  const PITCH = { 桜木: 0.9, 晴子: 1.25, 赤木: 0.7, 流川: 0.85, 宮城: 1.0, 三井: 0.95, 木暮: 1.05, 安西先生: 0.75, 彩子: 1.2, 洋平: 1.0, 母: 1.15 };
+  let rate = store.get("rate", 0.85);
+  function speak(text, who, onend) {
+    if (!("speechSynthesis" in window)) { onend && onend(); return; }
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "ja-JP"; u.rate = rate; u.pitch = PITCH[who] || 1;
+    const v = pickVoice(); if (v) u.voice = v;
+    if (onend) { u.onend = onend; u.onerror = onend; }
+    speechSynthesis.speak(u);
+  }
+  function stop() { if ("speechSynthesis" in window) speechSynthesis.cancel(); }
+  function playLines(lines, onLine) {
+    stop();
+    let i = 0;
+    const step = () => {
+      if (i >= lines.length) { onLine && onLine(-1); return; }
+      onLine && onLine(i);
+      const l = lines[i++];
+      speak(l.ja, l.who, () => setTimeout(step, 350));
+    };
+    step();
+  }
+
+  // ---------- 날짜 계산 ----------
+  function todayDay() {
+    const s = store.get("start", "");
+    if (!s) return null;
+    const start = new Date(s + "T00:00:00");
+    const now = new Date(); now.setHours(0, 0, 0, 0);
+    const d = Math.floor((now - start) / 86400000) + 1;
+    return Math.min(LAST, Math.max(1, d));
+  }
+  // 시작일이 있으면 앱을 열 때 항상 '오늘' 분량부터, 없으면 마지막으로 본 날부터
+  let day = todayDay() || store.get("lastDay", null) || 1;
+
+  const weekOf = (d) => Math.ceil(d / 7);
+  const dowOf = (d) => ((d - 1) % 7) + 1;
+  const tasksFor = (d) => d === LAST ? C.final.tasks : C.routine[dowOf(d) - 1].tasks;
+
+  // ---------- 렌더 도우미 ----------
+  const sayBtn = (text, who) => `<button class="say" data-say="${esc(text)}" data-who="${esc(who || "")}" aria-label="듣기">🔊</button>`;
+  const item = (x, opts = {}) => `
+    <div class="item${opts.cls ? " " + opts.cls : ""}" ${opts.idx != null ? `data-line="${opts.idx}"` : ""}>
+      ${x.who != null ? `<div class="who">${esc(x.who)}</div>` : ""}
+      <div class="body">
+        <div class="jp ${opts.blurJa ? "blur" : ""}">${esc(x.ja)}</div>
+        <div class="yomi ${opts.blurJa ? "blur" : ""}">${esc(x.yomi || "")}</div>
+        <div class="ko ${opts.blurKo ? "blur" : ""}">${esc(x.ko || "")}</div>
+      </div>
+      ${opts.noSay ? "" : sayBtn(x.ja, x.who)}
+    </div>`;
+  const card = (title, inner) => `<section class="card"><h2>${title}</h2>${inner}</section>`;
+  const noteBox = (key, ph) => `<textarea data-note="${esc(key)}" placeholder="${esc(ph)}">${esc(notes[key] || "")}</textarea>`;
+
+  const S = {
+    scene: (w) => card("이번 주 장면", `<div class="scene">${esc(w.scene)}</div><p><b>목표</b> · ${esc(w.goal)}</p>`),
+    kana: (w) => w.kana ? card("이번 주 가나", `<p class="ja" style="font-size:20px">${esc(w.kana)}</p>
+        <p class="muted">노트에 한 글자씩 5번 쓰면서 소리 내어 읽으세요.</p>`) : "",
+    vocab: (w) => card("단어 10", `<div class="row" style="margin-bottom:6px"><button class="btn sm" data-playall="vocab">▶ 전부 듣기</button></div>` + w.vocab.map((v) => item(v)).join("")),
+    vocab_test: (w) => card("단어 셀프 테스트 — 뜻을 말한 뒤 눌러서 확인", w.vocab.map((v) => item(v, { blurKo: true })).join("")),
+    grammar: (w) => card(`문법 · <span class="ja">${esc(w.grammar.point)}</span>`, `<p>${esc(w.grammar.explain)}</p>` + w.grammar.examples.map((e) => item(e)).join("")
+        + `<h3>나만의 예문 3개</h3>` + noteBox(`g${w.week}`, "여기에 써 두면 이 기기에 저장됩니다")),
+    phrases: (w) => card("핵심표현 5", w.phrases.map((p) => item(p)).join("")),
+    prev_phrases: (w) => { const p = W[w.week - 2]; return p ? card(`지난주(${p.week}주) 핵심표현 — 일본어로 말한 뒤 눌러서 확인`, p.phrases.map((x) => item(x, { blurJa: true })).join("")) : ""; },
+    dialogue: (w) => card("대화", `<div class="row" style="margin-bottom:6px"><button class="btn sm primary" data-playall="dialogue">▶ 대화 전체 듣기</button><button class="btn sm" data-stop>■ 멈춤</button></div>`
+        + `<div data-lines>` + w.dialogue.map((l, i) => item(l, { idx: i })).join("") + `</div>`),
+    dialogue_hidden: (w) => card("듣기 — 대본 없이 2번 들으세요", `<div class="row"><button class="btn primary" data-playall="dialogue">▶ 대화 듣기</button><button class="btn sm" data-stop>■ 멈춤</button></div>
+        <details><summary>대본 보기 (퀴즈를 푼 다음에!)</summary><div data-lines>${w.dialogue.map((l, i) => item(l, { idx: i })).join("")}</div></details>`),
+    quiz: (w) => card("듣기 퀴즈", w.quiz.map((q, i) => `<p><b>Q${i + 1}.</b> ${esc(q.q)}<br><span class="blur">${esc(q.a)}</span></p>`).join("") + `<p class="muted">정답은 흐린 글자를 누르면 보여요.</p>`),
+    speaking: (w) => card("말하기 과제", `<p>${esc(w.speaking)}</p>`),
+    roleplay: (w) => {
+      const who = [...new Set(w.dialogue.map((l) => l.who))];
+      return card("역할극", `<div class="row"><select data-role>${who.map((x) => `<option>${esc(x)}</option>`).join("")}</select>
+        <button class="btn primary sm" data-rp-start>▶ 시작</button><button class="btn sm" data-rp-next disabled>내 대사 끝 → 다음</button></div>
+        <p class="muted">내 차례가 되면 음성이 멈춥니다. 직접 말한 뒤 '다음'을 누르세요.</p>
+        <div data-rp>${w.dialogue.map((l, i) => item(l, { idx: i, noSay: true })).join("")}</div>`);
+    },
+    dictation: (w) => card("받아쓰기", w.dictation.map((s, i) => `<div class="dict" data-dict="${i}">${sayBtn(s)}
+        <input type="text" placeholder="${i + 1}. 들리는 대로 (히라가나 OK)" autocomplete="off"><button class="btn sm" data-check>확인</button><div class="res"></div></div>`).join("")),
+    writing: (w) => card("쓰기 과제", `<p>${esc(w.writing)}</p>` + noteBox(`w${w.week}`, "여기에 써 보세요 (자동 저장)")
+        + `<details><summary>모범 답안</summary>${item({ ja: w.writingExample.ja, ko: w.writingExample.ko })}</details>`),
+    selfcheck: (w) => {
+      const v = selfcheck[w.week] || {};
+      const sel = (k) => `<select data-self="${k}"><option value="">-</option>${[1, 2, 3, 4, 5].map((n) => `<option ${v[k] == n ? "selected" : ""}>${n}</option>`).join("")}</select>`;
+      return card("이번 주 자기평가 (1~5)", `<div class="row">말하기 ${sel("speak")} 듣기 ${sel("listen")} 쓰기 ${sel("write")}</div>`);
+    },
+  };
+
+  function finalPage() {
+    const pick = (arr, n) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a.slice(0, n); };
+    const dl = pick(W, 5);
+    const dict = pick(W.flatMap((w) => w.dictation), 10);
+    return card("듣기 — 무작위 대화 5개", dl.map((w, i) => `<div class="item"><div class="body"><b>${i + 1}. ${w.week}주 대화</b>
+        ${noteBox(`final-l${i}`, "들은 내용을 한국어로 요약")}<details><summary>대본</summary>${w.dialogue.map((l) => item(l, { noSay: true })).join("")}</details></div>
+        <button class="say" data-playweek="${w.week}" aria-label="듣기">🔊</button></div>`).join(""))
+      + card("받아쓰기 10", dict.map((s, i) => `<div class="dict" data-dict-text="${esc(s)}">${sayBtn(s)}<input type="text" placeholder="${i + 1}." autocomplete="off"><button class="btn sm" data-check>확인</button><div class="res"></div></div>`).join(""))
+      + card("말하기 — 3분 발표", `<p>'나의 1년과 일본어'를 3분 동안 녹음하세요. 1주차에 녹음한 파일이 있다면 나란히 들어 보세요.</p>`)
+      + card("쓰기 — 400자 작문", `<p>내가 좋아하는 슬램덩크 장면과 그 이유를 400자로 쓰세요.</p>${noteBox("final-w", "400자")}`);
+  }
+
+  // ---------- 메인 렌더 ----------
+  function render() {
+    stop();
+    store.set("lastDay", day);
+    const isFinal = day === LAST;
+    const w = W[weekOf(day) - 1];
+    const r = isFinal ? C.final : C.routine[dowOf(day) - 1];
+    $("#dTitle").textContent = `Day ${day}`;
+    $("#dSub").textContent = isFinal ? "최종 평가" : `${w.week}주차 · ${dowOf(day)}/7일 · ${r.name}`;
+    $("#weekSel").value = isFinal ? "final" : String(w.week);
+
+    const done = progress[day] || [];
+    const tasks = tasksFor(day);
+    const allDone = tasks.every((_, i) => done[i]);
+    let html = card(`오늘 할 일 · 약 ${r.minutes}분`,
+      (isFinal ? "" : `<p style="margin-top:0"><span class="tag">${w.week}주</span> <b>${esc(w.title)}</b></p>`)
+      + `<ul class="tasks">${tasks.map((t, i) => `<li class="${done[i] ? "done" : ""}"><input type="checkbox" data-task="${i}" ${done[i] ? "checked" : ""} id="t${i}"><span><label for="t${i}">${esc(t)}</label></span></li>`).join("")}</ul>`
+      + (allDone ? `<div class="complete" style="margin-top:10px">오늘 학습 완료! お疲れさまでした 🏀</div>` : ""));
+    html += isFinal ? finalPage() : r.sections.map((s) => S[s](w)).join("");
+    $("#main").innerHTML = html;
+    $("#main").classList.toggle("hide-yomi", !$("#tYomi").checked);
+    $("#main").classList.toggle("hide-ko", !$("#tKo").checked);
+    renderStats();
+    renderYear();
+  }
+
+  function dayState(d) {
+    const p = progress[d] || [];
+    const n = tasksFor(d).length;
+    const c = p.filter(Boolean).length;
+    return c === 0 ? "" : c >= n ? "done" : "part";
+  }
+  function renderStats() {
+    let done = 0;
+    for (let d = 1; d <= LAST; d++) if (dayState(d) === "done") done++;
+    let streak = 0;
+    const t = todayDay() || day;
+    for (let d = t; d >= 1 && dayState(d) === "done"; d--) streak++;
+    $("#stats").innerHTML = `완료 ${done}/${LAST}일<br>연속 ${streak}일 🔥`;
+    $("#bar").style.width = (done / LAST * 100) + "%";
+  }
+  function renderYear() {
+    const box = $("#year");
+    if (!box.children.length) {
+      box.innerHTML = Array.from({ length: LAST }, (_, i) => `<button data-go="${i + 1}" title="Day ${i + 1}" aria-label="Day ${i + 1}"></button>`).join("");
+    }
+    [...box.children].forEach((b, i) => { b.className = dayState(i + 1) + (i + 1 === day ? " cur" : ""); });
+  }
+
+  // ---------- 이벤트 ----------
+  const go = (d) => { day = Math.min(LAST, Math.max(1, d)); render(); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  $("#prev").onclick = () => go(day - 1);
+  $("#next").onclick = () => go(day + 1);
+  $("#todayBtn").onclick = () => go(todayDay() || day);
+  $("#weekSel").innerHTML = W.map((w) => `<option value="${w.week}">${w.week}주 · ${esc(w.title)}</option>`).join("") + `<option value="final">Day 365 · 최종 평가</option>`;
+  $("#weekSel").onchange = (e) => go(e.target.value === "final" ? LAST : (Number(e.target.value) - 1) * 7 + 1);
+  $("#tYomi").onchange = $("#tKo").onchange = () => { store.set("toggles", [$("#tYomi").checked, $("#tKo").checked]); render(); };
+  const tg = store.get("toggles", [true, true]); $("#tYomi").checked = tg[0]; $("#tKo").checked = tg[1];
+  $("#rate").value = rate; $("#rateV").textContent = "×" + rate;
+  $("#rate").oninput = (e) => { rate = Number(e.target.value); $("#rateV").textContent = "×" + rate; store.set("rate", rate); };
+  $("#startDate").value = store.get("start", "");
+  $("#startDate").onchange = (e) => { store.set("start", e.target.value); go(todayDay() || 1); };
+  $("#year").onclick = (e) => { const g = e.target.dataset.go; if (g) go(Number(g)); };
+
+  const kata2hira = (s) => s.replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
+  const norm = (s) => kata2hira(s.normalize("NFKC")).replace(/[\s、。，．,.!?！？「」『』…・〜~ー-]/g, "");
+  const findYomi = (ja) => { for (const w of W) for (const x of [...w.dialogue, ...w.phrases]) if (x.ja === ja) return x.yomi; return ""; };
+
+  let rp = null;
+  $("#main").addEventListener("click", (e) => {
+    const t = e.target.closest("[data-say],[data-playall],[data-stop],[data-check],[data-rp-start],[data-rp-next],[data-playweek],.blur");
+    if (!t) return;
+    const w = W[weekOf(day) - 1];
+    if (t.classList.contains("blur")) { t.classList.toggle("shown"); return; }
+    if (t.dataset.say != null) { stop(); speak(t.dataset.say, t.dataset.who); return; }
+    if (t.dataset.stop != null) { stop(); return; }
+    if (t.dataset.playweek) { playLines(W[Number(t.dataset.playweek) - 1].dialogue); return; }
+    if (t.dataset.playall === "vocab") { playLines(w.vocab); return; }
+    if (t.dataset.playall === "dialogue") {
+      const box = t.closest(".card").querySelector("[data-lines]");
+      playLines(w.dialogue, (i) => box.querySelectorAll(".item").forEach((el, j) => el.classList.toggle("now", j === i)));
+      return;
+    }
+    if (t.dataset.check != null) {
+      const row = t.closest(".dict");
+      const ans = row.dataset.dictText || w.dictation[Number(row.dataset.dict)];
+      const yomi = findYomi(ans);
+      const v = norm(row.querySelector("input").value);
+      const ok = v && (v === norm(ans) || (yomi && v === norm(yomi)));
+      const res = row.querySelector(".res");
+      res.className = "res " + (ok ? "ok" : "ng");
+      res.innerHTML = (ok ? "정답! " : "다시 확인: ") + `<span class="ja">${esc(ans)}</span>${yomi ? ` <span class="muted ja">(${esc(yomi)})</span>` : ""}`;
+      return;
+    }
+    if (t.dataset.rpStart != null) {
+      const cardEl = t.closest(".card");
+      const role = cardEl.querySelector("[data-role]").value;
+      const els = cardEl.querySelectorAll("[data-rp] .item");
+      const nextBtn = cardEl.querySelector("[data-rp-next]");
+      els.forEach((el, j) => el.classList.toggle("mine", w.dialogue[j].who === role));
+      stop();
+      rp = { i: 0, role, els, nextBtn };
+      rpStep();
+      return;
+    }
+    if (t.dataset.rpNext != null && rp) { rp.nextBtn.disabled = true; rp.i++; rpStep(); }
+  });
+  function rpStep() {
+    const w = W[weekOf(day) - 1];
+    if (!rp || rp.i >= w.dialogue.length) { rp && rp.els.forEach((el) => el.classList.remove("now")); return; }
+    const l = w.dialogue[rp.i];
+    rp.els.forEach((el, j) => el.classList.toggle("now", j === rp.i));
+    if (l.who === rp.role) { rp.nextBtn.disabled = false; return; }
+    speak(l.ja, l.who, () => setTimeout(() => { if (rp) { rp.i++; rpStep(); } }, 300));
+  }
+
+  $("#main").addEventListener("change", (e) => {
+    const t = e.target;
+    if (t.dataset.task != null) {
+      const p = progress[day] || [];
+      p[Number(t.dataset.task)] = t.checked;
+      progress[day] = p;
+      store.set("progress", progress);
+      render();
+    } else if (t.dataset.self) {
+      const wk = weekOf(day);
+      selfcheck[wk] = { ...(selfcheck[wk] || {}), [t.dataset.self]: t.value };
+      store.set("selfcheck", selfcheck);
+    }
+  });
+  $("#main").addEventListener("input", (e) => {
+    const k = e.target.dataset.note;
+    if (k) { notes[k] = e.target.value; store.set("notes", notes); }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
