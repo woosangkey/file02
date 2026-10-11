@@ -284,7 +284,122 @@ def build_proposal(months, samples):
     return out, doc.page
 
 
+# ---------------------------------------------------------------- 30-day course
+def build_course30():
+    c30 = json.load(open(os.path.join(ROOT, "syllabus30.json"), encoding="utf-8"))
+    days, weeks = c30["days"], {w["week"]: w for w in c30["weeks"]}
+    out = os.path.join(ROOT, "채권투자_30일_집중과정_커리큘럼.pdf")
+    dot = {"L": "#2a9d8f", "D": GOLD, "R": "#8e7cc3"}
+
+    def cover(c, doc):
+        c.saveState()
+        c.setFillColor(colors.HexColor(NAVY)); c.rect(0, 0, PAGE_W, PAGE_H, fill=1, stroke=0)
+        sz = 11 * mm
+        for i, d in enumerate(days):
+            x = MARGIN + (i % 7) * sz * 1.25; y = PAGE_H * 0.36 - (i // 7) * sz * 1.25
+            c.setFillColor(colors.HexColor(dot[d["type"]])); c.roundRect(x, y, sz, sz, 2, fill=1, stroke=0)
+            c.setFillColor(colors.white); c.setFont("NanumB", 9); c.drawCentredString(x + sz / 2, y + sz / 2 - 3, str(d["day"]))
+        c.setFillColor(colors.HexColor(GOLD)); c.setFont("NanumB", 11)
+        c.drawString(MARGIN, PAGE_H - 32 * mm, "CURRICULUM  ·  FIXED INCOME 30-DAY INTENSIVE")
+        c.setFillColor(colors.white); c.setFont("NanumEB", 34)
+        c.drawString(MARGIN, PAGE_H * 0.70, "채권투자 30일")
+        c.drawString(MARGIN, PAGE_H * 0.70 - 46, "집중 과정 커리큘럼")
+        c.setFont("Nanum", 13.5); c.drawString(MARGIN, PAGE_H * 0.70 - 82, "하루 10쪽 × 30일 — 기초 계산에서 하이엔드 판매자까지 한 바퀴")
+        c.setFont("Nanum", 9); c.setFillColor(colors.HexColor("#c9d3e0"))
+        c.drawString(MARGIN, PAGE_H * 0.36 + sz + 5 * mm, "■ 학습일   ■ 실전 드릴   ■ 복습·평가")
+        c.setFillColor(colors.white); c.setFont("Nanum", 9.5)
+        c.drawString(MARGIN, 18 * mm, "2026년 10월 · 「채권투자 365일 학습 과정」 압축판")
+        c.restoreState()
+
+    def page(c, doc):
+        c.saveState()
+        c.setStrokeColor(colors.HexColor(GOLD)); c.setLineWidth(0.8); c.line(MARGIN, PAGE_H - 13 * mm, PAGE_W - MARGIN, PAGE_H - 13 * mm)
+        c.setFont("NanumB", 8); c.setFillColor(colors.HexColor(NAVY)); c.drawString(MARGIN, PAGE_H - 11.5 * mm, c30["title"] + " 커리큘럼")
+        c.setFont("Nanum", 8); c.setFillColor(colors.HexColor("#777777")); c.drawRightString(PAGE_W - MARGIN, 10 * mm, str(doc.page))
+        c.restoreState()
+
+    doc = BaseDocTemplate(out, pagesize=(PAGE_W, PAGE_H), leftMargin=MARGIN, rightMargin=MARGIN, topMargin=20 * mm, bottomMargin=18 * mm,
+                          title=c30["title"] + " 커리큘럼", author=PROGRAM)
+    fr = Frame(MARGIN, 16 * mm, AVAIL, PAGE_H - 36 * mm)
+    doc.addPageTemplates([PageTemplate("cover", frames=[fr], onPage=cover), PageTemplate("body", frames=[fr], onPage=page)])
+    R = lambda b, color=NAVY: render_block(b, S, color, AVAIL)
+    st = [NextPageTemplate("body"), PageBreak(), Paragraph("과정 요약", S["h1"])]
+    st += [Paragraph(fmt(t), S["bullet"], bulletText="■") for t in c30["summary"]]
+    st += [Spacer(1, 6), Paragraph("1. 학습 리듬과 하루 구성", S["h1"])]
+    st += R({"type": "table", "header": ["요일", "유형", "내용", "분량·시간"], "widths": [0.8, 1, 3.4, 1.2], "rows": [
+        ["1~5일차", "학습일", "핵심 개념 1개를 압축 학습: 목표 → 워밍업 → 본문 → 예제 → 연습문제 → 정답 → 정리 노트", "10쪽 · 약 120분"],
+        ["6일차", "실전 드릴", "그 주 내용으로 개념·계산 문제와 케이스 스터디", "10쪽 · 약 120분"],
+        ["7일차", "주간 복습", "요약 노트, 공식 카드, 모의테스트 20문항, 오답 정리", "10쪽 · 약 90분"],
+    ], "caption": "표 1. 주간 리듬 (4주 반복 후 29~30일차 캡스톤·수료)"})
+    st += R({"type": "table", "header": ["구성 요소", "쪽수", "역할"], "widths": [2, 0.7, 3.6], "rows": [
+        ["헤더·오늘의 목표·워밍업", "0.5", "전날 내용 2문항 인출 연습"],
+        ["본문 (5~6섹션)", "5", "개념, 표·차트, 수식, 단계별 「예제」, 「실무 팁」"],
+        ["핵심 정리·연습문제·용어", "2", "5줄 요약, 연습 8문항, 용어 8~10개"],
+        ["정답과 해설·내일 예고·학습 기록", "1.5", "계산 과정 전체 공개, 이해도 자가평가"],
+        ["나의 정리 노트", "1", "교재 없이 스스로 요약하는 필기면"],
+    ], "caption": "표 2. 하루 10쪽 구성 (365일 과정과 동일한 템플릿)"}, TEAL)
+
+    st += [CondPageBreak(80 * mm), Paragraph("2. 4주 로드맵", S["h1"])]
+    rows = []
+    for w in c30["weeks"]:
+        ds = [d for d in days if d["week"] == w["week"]]
+        rows.append([f"{w['week']}주차" if w["week"] < 5 else "마무리", w["title"], w["level"], f"Day {ds[0]['day']}–{ds[-1]['day']}",
+                     " · ".join(w["outcomes"])])
+    st += R({"type": "table", "header": ["주차", "주제", "수준", "범위", "도달 목표"], "widths": [0.7, 1.9, 0.9, 0.9, 3.2], "rows": rows,
+             "caption": "표 3. 주차별 로드맵"})
+    st += R({"type": "table", "header": ["평가", "시점", "방식", "기준"], "widths": [1.2, 1, 3, 1.2], "rows": [
+        ["주간 모의테스트", "7·14·21·28일차", "20문항(개념 10·계산 10), 자가 채점", "80점 이상"],
+        ["주차별 산출물", "매 학습일", "엑셀 시트·리포트·스크립트 등 그날의 산출물", "제출 완료"],
+        ["캡스톤", "29일차", "가상 고객 2명 대상 포트폴리오 구성과 제안서", "체크리스트 충족"],
+        ["종합 모의고사", "30일차", "50문항 + 사례형 2문항", "70점 이상 수료"],
+    ], "caption": "표 4. 평가와 수료 기준"})
+    st += R({"type": "table", "header": ["구분", "30일 집중 과정", "365일 학습 과정"], "widths": [1, 2.6, 2.6], "rows": [
+        ["분량", "300쪽 (10쪽 × 30일)", "약 3,650쪽 (10쪽 × 365일)"],
+        ["깊이", "핵심 개념과 대표 계산·케이스 위주", "주제별 심화, 변형 문제, 엑셀 실습 다수"],
+        ["추천 대상", "단기간에 전 범위를 파악해야 하는 실무자, 연수·온보딩", "채권 전문가·세일즈로 성장하려는 학습자"],
+        ["활용법", "먼저 완주해 전체 지도를 잡는다", "30일 과정에서 약했던 주제를 대응 범위부터 심화"],
+    ], "caption": "표 5. 30일 과정과 365일 과정 비교"}, TEAL)
+
+    for w in c30["weeks"]:
+        st += [PageBreak() if w["week"] == 1 else CondPageBreak(95 * mm)]
+        if w["week"] == 1: st.append(Paragraph("3. 일차별 상세 커리큘럼", S["h1"]))
+        lv = w["level"]
+        st.append(Table([[badge(f"{w['week']}주차" if w["week"] < 5 else "마무리", NAVY, 16), badge(lv, LEVEL_COLOR.get(lv.split("→")[-1], NAVY), 24),
+                          Paragraph(fmt(w["title"]), ParagraphStyle("wt", fontName="NanumEB", fontSize=14, leading=19, textColor=colors.HexColor(NAVY), wordWrap="CJK"))]],
+                        colWidths=[18 * mm, 26 * mm, AVAIL - 44 * mm], style=[("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("LEFTPADDING", (0, 0), (-1, -1), 0)]))
+        st += [Spacer(1, 5), box([Paragraph(fmt(w["goal"]), S["callb"])], "#eef3f6", NAVY), Spacer(1, 5)]
+        hdr = [Paragraph(h, S["cellh"]) for h in ["Day", "유형", "제목", "주요 내용", "산출물", "365일 대응"]]
+        rws, sty = [], [("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(NAVY)), ("GRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#c8cdd2")),
+                        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]
+        for i, d in enumerate([d for d in days if d["week"] == w["week"]], 1):
+            rws.append([Paragraph(f"<b>{d['day']}</b>", S["cell"]), Paragraph(TYPE_NAME[d["type"]], S["cell"]), Paragraph(f"<b>{fmt(d['title'])}</b>", S["cell"]),
+                        Paragraph("<br/>".join("· " + fmt(t) for t in d["topics"]), S["cell"]), Paragraph(fmt(d["deliverable"]), S["cell"]), Paragraph(fmt(d["ref"]), S["cell"])])
+            if d["type"] == "D": sty.append(("BACKGROUND", (0, i), (-1, i), colors.HexColor("#fbf1e6")))
+            if d["type"] == "R": sty.append(("BACKGROUND", (0, i), (-1, i), colors.HexColor("#f0ecf7")))
+        t = Table([hdr] + rws, colWidths=[AVAIL * x for x in (0.06, 0.09, 0.2, 0.33, 0.18, 0.14)], repeatRows=1); t.setStyle(TableStyle(sty))
+        st += [t, Spacer(1, 10)]
+
+    st += [PageBreak(), Paragraph("4. 30일 진도 체크표", S["h1"]),
+           Paragraph("매일 학습을 마치면 체크하고, 이해도가 3 이하인 날은 「365일 대응」 범위를 보충 학습 목록에 적는다.", S["small"]), Spacer(1, 6)]
+    rows = [["Day", "제목", "완료", "이해도(1~5)", "산출물", "보충 필요"]]
+    for d in days:
+        rows.append([str(d["day"]), Paragraph(fmt(d["title"]), S["cell"]), "□", "1  2  3  4  5", "□", "□"])
+    t = Table(rows, colWidths=[AVAIL * x for x in (0.07, 0.48, 0.08, 0.17, 0.1, 0.1)], repeatRows=1, rowHeights=[16] + [19.5] * len(days))
+    t.setStyle(TableStyle([("FONTNAME", (0, 0), (-1, 0), "NanumB"), ("FONTNAME", (0, 1), (-1, -1), "Nanum"), ("FONTSIZE", (0, 0), (-1, -1), 8.3),
+                           ("TEXTCOLOR", (0, 0), (-1, 0), colors.white), ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(NAVY)),
+                           ("GRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#c8cdd2")), ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                           ("ALIGN", (0, 0), (0, -1), "CENTER"), ("ALIGN", (2, 0), (-1, -1), "CENTER")] +
+                          [("BACKGROUND", (0, i), (-1, i), colors.HexColor("#f3f5f7")) for i in range(2, len(rows), 2)]))
+    st.append(t)
+    st += [Spacer(1, 10)] + R({"type": "callout", "title": "유의사항", "text":
+        "교재의 시장 수치·기업은 예시 또는 가상이며, 세율·법령·거래소 명세는 개정될 수 있으므로 실제 업무 적용 전 최신 기준 확인이 필요하다. 본 과정은 교육 목적이며 특정 금융상품의 매수·매도를 권유하지 않는다."}, GOLD)[:-1]
+    doc.build(st)
+    return out, doc.page
+
+
 if __name__ == "__main__":
+    if "--30" in sys.argv:
+        o, n = build_course30(); print(f"{n:3d} pages  {os.path.basename(o)}"); sys.exit()
     months = load_syllabus()
     os.makedirs(os.path.join(ROOT, "pdf"), exist_ok=True)
     samples = []
