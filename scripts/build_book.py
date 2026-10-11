@@ -9,6 +9,8 @@ from reportlab.platypus import (BaseDocTemplate, PageTemplate, Frame, Paragraph,
 from reportlab.platypus.tableofcontents import TableOfContents
 
 sys.path.insert(0, os.path.dirname(__file__))
+import build
+build.CHART_H = 2.6
 from build import styles, fmt, render_block, PAGE_W, PAGE_H, MARGIN  # noqa: E402  (registers fonts)
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -23,7 +25,12 @@ PARTS = [
 ]
 
 S = styles(NAVY)
-S["h1"].fontSize = 15; S["h1"].leading = 21
+S["h1"].fontSize = 14; S["h1"].leading = 19; S["h1"].spaceAfter = 6
+S["body"].fontSize = 9.4; S["body"].leading = 14.6; S["body"].spaceAfter = 4
+S["bullet"].fontSize = 9.4; S["bullet"].leading = 14.2; S["bullet"].spaceAfter = 2
+S["callb"].fontSize = 9; S["callb"].leading = 13.6
+S["cell"].fontSize = 8.2; S["cell"].leading = 11
+S["h2"].fontSize = 11.5; S["h2"].spaceBefore = 6
 S["toc0"] = ParagraphStyle("toc0", fontName="NanumB", fontSize=11.5, leading=20, textColor=colors.HexColor(NAVY), spaceBefore=8)
 S["toc1"] = ParagraphStyle("toc1", fontName="Nanum", fontSize=10, leading=17, leftIndent=14)
 S["toc2"] = ParagraphStyle("toc2", fontName="Nanum", fontSize=8.8, leading=14, leftIndent=30, textColor=colors.HexColor("#555555"))
@@ -129,7 +136,7 @@ def chapter_opener(ch, avail):
     label = "부록" if str(ch["no"]) == "A" else f"CHAPTER {int(ch['no']):02d}"
     out = [Marker(chapter=(ch["title"] if str(ch["no"]) == "A" else f"제{ch['no']}장  {ch['title']}"), opener=True),
            Marker(toc=(1, ch["title"] if str(ch["no"]) == "A" else f"제{ch['no']}장&nbsp;&nbsp;{fmt(ch['title'])}"))]
-    out.append(Spacer(1, 18 * mm))
+    out.append(Spacer(1, 8 * mm))
     out.append(Paragraph(label, ParagraphStyle("cl", fontName="NanumB", fontSize=12, textColor=colors.HexColor(GOLD), leading=16)))
     out.append(Spacer(1, 4))
     out.append(Paragraph(fmt(ch["title"]), ParagraphStyle("ct", fontName="NanumEB", fontSize=24, leading=32, textColor=colors.HexColor(NAVY), wordWrap="CJK")))
@@ -138,7 +145,7 @@ def chapter_opener(ch, avail):
     badge.hAlign = "LEFT"
     out += [Spacer(1, 8), badge, Spacer(1, 14)]
     if ch.get("objectives"):
-        inner = [Paragraph("학습 목표", S["callt"])] + [Paragraph(fmt(o), S["bullet"], bulletText="✓") for o in ch["objectives"]]
+        inner = [Paragraph("학습 목표", S["callt"])] + [Paragraph(fmt(o), S["bullet"], bulletText="√") for o in ch["objectives"]]
         t = Table([[inner]], colWidths=[avail])
         t.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#eef2f7")),
                                ("LINEABOVE", (0, 0), (-1, 0), 2, colors.HexColor(NAVY)),
@@ -152,7 +159,7 @@ def chapter_end(ch, avail):
     out = []
     if ch.get("takeaways"):
         inner = [Paragraph("핵심 정리", ParagraphStyle("kt", parent=S["callt"], textColor=colors.white))] + \
-                [Paragraph(fmt(t), ParagraphStyle("kb", parent=S["bullet"], textColor=colors.white), bulletText="▸") for t in ch["takeaways"]]
+                [Paragraph(fmt(t), ParagraphStyle("kb", parent=S["bullet"], textColor=colors.white), bulletText="▶") for t in ch["takeaways"]]
         t = Table([[inner]], colWidths=[avail])
         t.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), colors.HexColor(NAVY)),
                                ("LEFTPADDING", (0, 0), (-1, -1), 12), ("RIGHTPADDING", (0, 0), (-1, -1), 12),
@@ -194,11 +201,11 @@ def build():
     out = os.environ.get("OUT", os.path.join(ROOT, "book", "채권투자_실무가이드.pdf"))
     doc = BookDoc(out, pagesize=(PAGE_W, PAGE_H), leftMargin=MARGIN, rightMargin=MARGIN, topMargin=20 * mm,
                   bottomMargin=18 * mm, title=f"{TITLE} — {SUBTITLE}", author="Fixed Income Practice Notes")
-    frame = Frame(MARGIN, 18 * mm, PAGE_W - 2 * MARGIN, PAGE_H - 38 * mm, id="f")
+    frame = Frame(MARGIN - 3 * mm, 16 * mm, PAGE_W - 2 * MARGIN + 6 * mm, PAGE_H - 34 * mm, id="f")
     doc.addPageTemplates([PageTemplate("cover", frames=[frame], onPage=cover),
                           PageTemplate("part", frames=[frame], onPage=part_page),
                           PageTemplate("body", frames=[frame], onPageEnd=page_end)])
-    avail = PAGE_W - 2 * MARGIN
+    avail = PAGE_W - 2 * MARGIN + 6 * mm - 12
     toc = TableOfContents(); toc.levelStyles = [S["toc0"], S["toc1"], S["toc2"]]; toc.dotsMinLevel = 1
     story = [NextPageTemplate("body"), PageBreak(), Marker(chapter="", opener=True)]
     story += front_matter(avail)

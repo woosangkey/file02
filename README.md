@@ -15,3 +15,8 @@
 
 본문 원고는 `content/*.json`, 재생성은 `python3 scripts/build.py` (reportlab, matplotlib, 나눔고딕 필요).
 교육·참고용 자료이며 '예시/가상'으로 표기된 수치는 실제 데이터가 아닙니다.
+
+## 채권투자 실무 가이드 (단행본, 112쪽)
+
+`book/채권투자_실무가이드.pdf` — 중급(1부) · 상급(2부) · 하이엔드 판매자(3부) 12장 + 부록(공식집·용어사전·종합문제).
+원고는 `book/chapters/*.json`, 재생성은 `python3 scripts/build_book.py`.

@@ -55,23 +55,48 @@ def styles(accent):
     return s
 
 
+SUB = dict(zip("₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎ₐₑₒₓₕₖₗₘₙₚₛₜᵢ", "0123456789+-=()aeoxhklmnpsti"))
+SUP = dict(zip("⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ᵐᵗᵏᴺⁿ", "0123456789+-=()mtkNn"))
+
+
+def glyphsafe(t):
+    """Map characters missing from Nanum fonts to safe equivalents / sub-superscript markup."""
+    t = t.replace("\u2212", "-")
+    out, mode = [], None
+    for ch in t:
+        m = "sub" if ch in SUB else "super" if ch in SUP else None
+        if m != mode:
+            if mode: out.append(f"</{mode}>")
+            if m: out.append(f"<{m}>")
+            mode = m
+        out.append(SUB.get(ch) or SUP.get(ch) or ch)
+    if mode: out.append(f"</{mode}>")
+    return "".join(out)
+
+
 def fmt(text):
     """Escape text but allow **bold** markup."""
-    t = escape(str(text))
+    t = glyphsafe(escape(str(text)))
     parts = t.split("**")
     return "".join(f"<b>{p}</b>" if i % 2 else p for i, p in enumerate(parts))
 
 
+CHART_H = 3.0
+
+
 def chart_image(b, accent, width):
+    b = json.loads(json.dumps(b, ensure_ascii=False).translate(str.maketrans({**SUB, **SUP, "\u2212": "-"})))
     kind = b.get("kind", "line")
-    fig, ax = plt.subplots(figsize=(7.2, 3.0), dpi=160)
+    fig, ax = plt.subplots(figsize=(7.2, CHART_H), dpi=160)
     x = b.get("x", [])
     series = b.get("series", {})
     cols = [accent] + [c for c in PALETTE if c.lower() != accent.lower()]
     if kind == "pie":
         name, vals = next(iter(series.items()))
-        ax.pie(vals, labels=x, autopct="%1.1f%%", colors=cols[:len(vals)], startangle=90,
-               wedgeprops=dict(width=0.45, edgecolor="white"), textprops=dict(fontsize=9))
+        _, _, pct = ax.pie(vals, labels=x, autopct="%1.1f%%", colors=cols[:len(vals)], startangle=90, pctdistance=0.78,
+                           wedgeprops=dict(width=0.45, edgecolor="white"), textprops=dict(fontsize=9))
+        for t in pct:
+            t.set_color("white"); t.set_fontsize(8); t.set_fontweight("bold")
         ax.axis("equal")
     elif kind in ("bar", "barh", "stacked"):
         n = len(series)
@@ -114,7 +139,7 @@ def chart_image(b, accent, width):
     ax.set_title(b.get("title", ""), fontsize=11, fontweight="bold", loc="left")
     fig.tight_layout()
     buf = io.BytesIO(); fig.savefig(buf, format="png"); plt.close(fig); buf.seek(0)
-    img = Image(buf, width=width, height=width * 3.0 / 7.2)
+    img = Image(buf, width=width, height=width * CHART_H / 7.2)
     return img
 
 
@@ -223,7 +248,7 @@ def build(json_path, out_dir):
     # Summary + TOC page
     story.append(Paragraph("요약 (Executive Summary)", s["h1"]))
     for p in d.get("summary", []):
-        story.append(Paragraph(fmt(p), s["bullet"], bulletText="▪"))
+        story.append(Paragraph(fmt(p), s["bullet"], bulletText="■"))
     story.append(Spacer(1, 14))
     story.append(Paragraph("목차", s["h1"]))
     for sec in d["sections"]:
