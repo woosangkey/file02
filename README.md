@@ -24,6 +24,7 @@ weeks/            ← 주차별 학습지 52개 + 최종평가 (인쇄용 마크
 data/q1~q4.json   ← 원본 데이터 (분기별 13주)
 data/syllabus.md  ← 1년 실라버스 (장면 × 문법)
 build.py          ← data/*.json → app/data.js, weeks/*.md 생성
+gen_audio.py      ← data/*.json → audio/wNN.mp3 (주차별 음성) + app/audio-index.js
 ```
 
 매주 1개의 장면을 다루며, 장면마다 다음 자료가 들어 있습니다.
@@ -49,7 +50,8 @@ build.py          ← data/*.json → app/data.js, weeks/*.md 생성
    - 가장 쉬운 방법: 저장소 Settings → Pages → Branch를 이 브랜치(또는 main)로 지정하면 `https://<아이디>.github.io/file02/` 에서 휴대폰으로 바로 열 수 있습니다.
    - 또는 저장소를 내려받아 `index.html`을 브라우저로 엽니다 (인터넷 없이도 동작, 글꼴만 기본 글꼴로 바뀜).
 2. 아래쪽 **설정 → 학습 시작일**을 넣으면 매일 그날 분량이 자동으로 열립니다.
-3. 🔊 버튼은 기기의 일본어 음성(TTS)을 씁니다. 소리가 안 나면 휴대폰/PC 설정에서 **일본어 음성**을 설치하세요. 속도는 처음엔 ×0.8, 익숙해지면 ×1.0 이상으로.
+3. 🔊 버튼은 미리 만들어 둔 음성 파일(`audio/`)을 재생합니다. 속도는 처음엔 ×0.8, 익숙해지면 ×1.0 이상으로.
+   음성은 오프라인 음성합성(Open JTalk)으로 만든 것이라 실제 사람 발음보다 억양이 조금 딱딱합니다. 3분기부터는 애니메이션·드라마 등 실제 일본어도 함께 들으세요.
 4. 할 일을 체크하면 진도표에 기록됩니다. 기록과 작문은 **그 기기의 브라우저에만** 저장되니, 한 기기로 꾸준히 쓰는 게 좋습니다.
 5. 종이로 공부하고 싶다면 `weeks/` 폴더의 학습지를 인쇄하세요.
 
@@ -63,7 +65,7 @@ build.py          ← data/*.json → app/data.js, weeks/*.md 생성
 
 ## 자료 수정하기
 
-`data/q1.json` ~ `data/q4.json`을 고친 뒤 `python3 build.py`를 실행하면 앱 데이터(`app/data.js`)와 학습지(`weeks/`)가 다시 만들어집니다. 데이터 형식은 `data/SPEC.md`를 보세요.
+`data/q1.json` ~ `data/q4.json`을 고친 뒤 `python3 build.py`를 실행하면 앱 데이터(`app/data.js`)와 학습지(`weeks/`)가 다시 만들어집니다. 문장을 바꿨다면 `pip install pyopenjtalk-plus numpy` 후 `python3 gen_audio.py`로 음성도 다시 만드세요(ffmpeg 필요). 데이터 형식은 `data/SPEC.md`를 보세요.
 
 ## 저작권 안내
 

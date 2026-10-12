@@ -133,7 +133,7 @@ footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 2
     <div class="toggles">
       <label><input type="checkbox" id="tYomi" checked> 읽는 법(히라가나)</label>
       <label><input type="checkbox" id="tKo" checked> 한국어 뜻</label>
-      <label>속도 <input type="range" id="rate" min="0.5" max="1.2" step="0.05" value="0.85"> <span id="rateV"></span></label>
+      <label>속도 <input type="range" id="rate" min="0.6" max="1.2" step="0.05" value="0.9"> <span id="rateV"></span></label>
     </div>
     <div class="row" style="margin-top:12px">
       <label class="muted" for="startDate">학습 시작일</label>
@@ -152,6 +152,7 @@ footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 2
 </div>
 
 <script src="app/data.js"></script>
+<script src="app/audio-index.js"></script>
 <script>
 (() => {
   const C = window.COURSE;
@@ -179,10 +180,35 @@ footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 2
     warn.innerHTML = voices.length && !pickVoice()
       ? `<div class="card warn">이 기기에 일본어 음성이 없습니다. 휴대폰/PC 설정 → 언어 → 텍스트 음성 변환에서 <b>일본어</b> 음성을 설치하면 듣기 기능을 쓸 수 있어요.</div>` : "";
   }
-  if ("speechSynthesis" in window) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+  const AI = window.AUDIO_INDEX;
+  if ("speechSynthesis" in window && !AI) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
   const PITCH = { 桜木: 0.9, 晴子: 1.25, 赤木: 0.7, 流川: 0.85, 宮城: 1.0, 三井: 0.95, 木暮: 1.05, 安西先生: 0.75, 彩子: 1.2, 洋平: 1.0, 母: 1.15 };
-  let rate = store.get("rate", 0.85);
-  function speak(text, who, onend) {
+  let rate = store.get("rate", 0.9);
+
+  // 녹음 파일(audio/wNN.mp3)에서 문장 구간을 찾아 재생. 없으면 기기 음성으로.
+  let actx = null, src = null, token = 0;
+  const buffers = {};
+  function findClip(text, who) {
+    if (!AI) return null;
+    const cur = weekOf(day);
+    const order = [cur, ...Object.keys(AI).map(Number).filter((n) => n !== cur)];
+    for (const n of order) {
+      const m = AI[n]; if (!m) continue;
+      const hit = m[`${who || ""}\t${text}`] || m[`\t${text}`] || Object.entries(m).find(([k]) => k.split("\t")[1] === text)?.[1];
+      if (hit) return { week: n, start: hit[0], dur: hit[1] };
+    }
+    return null;
+  }
+  function loadWeek(n) {
+    if (!buffers[n]) {
+      buffers[n] = fetch(`audio/w${String(n).padStart(2, "0")}.mp3`)
+        .then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+        .then((b) => new Promise((ok, ng) => actx.decodeAudioData(b, ok, ng)))
+        .catch((e) => { delete buffers[n]; throw e; });
+    }
+    return buffers[n];
+  }
+  function speakTTS(text, who, onend) {
     if (!("speechSynthesis" in window)) { onend && onend(); return; }
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "ja-JP"; u.rate = rate; u.pitch = PITCH[who] || 1;
@@ -190,7 +216,28 @@ footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 2
     if (onend) { u.onend = onend; u.onerror = onend; }
     speechSynthesis.speak(u);
   }
-  function stop() { if ("speechSynthesis" in window) speechSynthesis.cancel(); }
+  function speak(text, who, onend) {
+    const clip = findClip(text, who);
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!clip || !AC) { speakTTS(text, who, onend); return; }
+    if (!actx) actx = new AC();
+    if (actx.state === "suspended") actx.resume();
+    const my = ++token;
+    loadWeek(clip.week).then((buf) => {
+      if (my !== token) return;
+      src = actx.createBufferSource();
+      src.buffer = buf;
+      src.playbackRate.value = rate;
+      src.connect(actx.destination);
+      src.onended = () => { if (my === token) { src = null; onend && onend(); } };
+      src.start(0, clip.start, clip.dur);
+    }).catch(() => { if (my === token) speakTTS(text, who, onend); });
+  }
+  function stop() {
+    token++;
+    if (src) { try { src.stop(); } catch {} src = null; }
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
+  }
   function playLines(lines, onLine) {
     stop();
     let i = 0;
