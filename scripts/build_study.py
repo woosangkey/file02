@@ -401,6 +401,49 @@ def build_course30():
     return out, doc.page
 
 
+def build_market_brief(out):
+    """Two-page market briefing (2026-10 levels) inserted into every weekly binder."""
+    def page(c, doc):
+        c.saveState()
+        c.setFillColor(colors.HexColor(NAVY)); c.rect(0, PAGE_H - 11 * mm, PAGE_W, 11 * mm, fill=1, stroke=0)
+        c.setFillColor(colors.white); c.setFont("NanumB", 8.5); c.drawString(MARGIN, PAGE_H - 7 * mm, "채권투자 30일 집중 과정  ·  시장 브리핑")
+        c.setFont("Nanum", 8.5); c.drawRightString(PAGE_W - MARGIN, PAGE_H - 7 * mm, "2026년 10월 초 기준")
+        c.restoreState()
+    doc = BaseDocTemplate(out, pagesize=(PAGE_W, PAGE_H), leftMargin=MARGIN, rightMargin=MARGIN, topMargin=18 * mm, bottomMargin=16 * mm)
+    doc.addPageTemplates([PageTemplate("p", frames=[Frame(MARGIN, 14 * mm, AVAIL, PAGE_H - 30 * mm)], onPage=page)])
+    R = lambda b, color=NAVY: render_block(b, S, color, AVAIL)
+    st = [Paragraph("2026년 10월 채권시장 브리핑 — 교재 수치를 지금 시장에 대입하기", S["h1"]),
+          Paragraph(fmt("이 과정의 예제는 계산 원리를 보여 주기 위해 단순화한 가상 수치를 많이 쓴다. 2주차부터는 아래 **2026년 10월 초 실제 수준**을 예제와 시황 해석에 직접 사용한다. 1주차 계산 문제도 아래 금리로 다시 풀어 보면 「지금 시장에서 이 채권은 얼마인가」를 바로 체감할 수 있다."), S["body"])]
+    st += R({"type": "table", "header": ["구분", "지표", "수준", "기준일·출처 유형"], "widths": [0.8, 1.8, 1.1, 2.6], "rows": [
+        ["한국", "한국은행 기준금리", "3.00%", "2026-08-27 인상(7월 2.50→2.75, 8월 2.75→3.00) · 언론 보도"],
+        ["한국", "국고채 3년 / 5년", "3.98% / 4.16%", "2026-10-08 종가 · 언론 데이터"],
+        ["한국", "국고채 10년 / 30년", "4.40% / 4.45%", "2026-10-08 종가 · 언론 데이터"],
+        ["한국", "CD 91일", "3.24%", "2026-10-06~08 · 언론 보도"],
+        ["한국", "회사채 AA- 3년", "약 4.64~4.65%", "2026-10-06~08 · 데이터 서비스"],
+        ["한국", "소비자물가 상승률", "5월 3.1%, 6월 3.2%", "한은, 하반기 3% 안팎 전망"],
+        ["환율", "원/달러", "1,338.5원", "2026-10-08 주간 종가 · 언론 보도"],
+        ["미국", "연방기금금리 목표", "3.75~4.00%", "2026-09-16 FOMC 25bp 인상"],
+        ["미국", "미 국채 10년", "약 5.22%", "2026-10-08 · Fed H.15 (10-07 장중 5.35%, 2002년 이후 최고)"],
+        ["일정", "금통위 / FOMC", "10-22 / 10-28", "일정 안내 자료"],
+    ], "caption": "표 B-1. 2026년 10월 초 주요 금리·환율 (교재 작성 시점 기준, 실제 업무 전 최신 값 확인)"})
+    st += R({"type": "chart", "kind": "line", "title": "국고채 수익률곡선 (2026-10-08 종가)", "x": ["3년", "5년", "10년", "30년"],
+             "series": {"국고채": [3.98, 4.16, 4.40, 4.45], "기준금리": [3.00, 3.00, 3.00, 3.00]}, "ylabel": "%",
+             "caption": "그림 B-1. 우상향 커브, 10~30년 구간은 평탄 · 기준금리보다 3년물이 약 98bp 높아 추가 인상 기대가 일부 반영된 모습"})
+    st += R({"type": "table", "header": ["계산 지표", "값", "의미"], "widths": [1.8, 1, 3.5], "rows": [
+        ["국고 3년-10년 스프레드", "약 42bp", "커브 기울기. 인상기 치고 완만한 우상향"],
+        ["AA- 3년 신용스프레드", "약 65~70bp", "국고3년 대비 가산금리. 2주차 신용분석의 기준점"],
+        ["한미 10년 금리차", "약 -82bp", "미국 5.22% - 한국 4.40%. 해외채권·환율 판단의 출발점"],
+        ["달러채 환헤지 비용(근사)", "연 약 0.6~0.7%p", "원화 단기금리(CD 3.24%) - 달러 단기금리(약 3.9%). 실제는 스왑포인트로 확인"],
+        ["국고 3년 금리 +100bp 시 손실(근사)", "약 -2.8%", "수정 듀레이션 약 2.8 가정. 1주차 Day 5 방법"],
+    ], "caption": "표 B-2. 교재에서 자주 쓰는 계산값 (근사·예시)"}, TEAL)
+    st += R({"type": "callout", "title": "지금 시장을 읽는 세 가지 질문", "text":
+             "① 한·미 모두 금리를 올리는 국면이다. 추가 인상, 동결, 인하 전환 중 어느 시나리오에서 내 채권의 손익은 어떻게 되는가(듀레이션·브레이크이븐). ② 장기금리가 높아졌다. 지금 금리로 확정되는 이자(캐리)가 금리 추가 상승의 손실을 얼마나 상쇄하는가. ③ 미국채 5%대와 원화 4%대, 환헤지 비용을 감안하면 실제 차이는 얼마인가. 이 과정은 이 세 질문에 숫자로 답하는 법을 다룬다."}, GOLD)
+    st += R({"type": "callout", "title": "출처와 유의사항", "text":
+             "수치는 2026년 10월 초 언론 보도(머니투데이, 한국경제 데이터센터, 핀포인트뉴스 등), 미 연준 H.15, 데이터 서비스 등을 웹 검색으로 확인한 값이며 출처 간 소폭 차이가 있다. 시장 수치는 매일 바뀌므로 실제 투자·상담 전 한국은행 ECOS, 금융투자협회 채권정보센터, 연준 자료 등에서 최신 값을 확인해야 한다. 이 브리핑은 금리 전망이 아니며 특정 상품의 매수·매도를 권유하지 않는다."}, NAVY)[:-1]
+    doc.build(st)
+    return out
+
+
 def build_week30(week):
     """Render 30-day course daily lessons for one week, plus a bound weekly volume with a cover."""
     c30 = json.load(open(os.path.join(ROOT, "syllabus30.json"), encoding="utf-8"))
@@ -443,13 +486,14 @@ def build_week30(week):
     doc = BaseDocTemplate(cov, pagesize=(PAGE_W, PAGE_H))
     doc.addPageTemplates([PageTemplate("c", frames=[Frame(0, 0, PAGE_W, PAGE_H)], onPage=cover)])
     doc.build([Spacer(1, 1)])
-    from pypdf import PdfWriter
-    wtr = PdfWriter(); wtr.append(cov); page = 1
+    from pypdf import PdfWriter, PdfReader
+    brief = build_market_brief(os.path.join(cfg["out_dir"], "_brief.pdf"))
+    wtr = PdfWriter(); wtr.append(cov); wtr.append(brief, outline_item="2026년 10월 채권시장 브리핑"); page = 1
     for o, x, n in outs:
         wtr.append(o, outline_item=f"DAY {x['day']:02d}  {x['title']}"); page += n
     bound = os.path.join(base, f"채권투자_30일과정_{week}주차_교재.pdf")
-    wtr.write(bound); os.remove(cov)
-    return bound, 1 + sum(n for _, _, n in outs)
+    wtr.write(bound); os.remove(cov); os.remove(brief)
+    return bound, len(PdfReader(bound).pages)
 
 
 if __name__ == "__main__":
