@@ -64,35 +64,39 @@ def load_syllabus():
 
 
 # ---------------------------------------------------------------- daily lesson
-def build_day(path, months):
+def build_day(path, months, cfg=None):
+    """cfg: None for the 365-day programme, or dict(program, total, digits, out_dir, unit) for another course."""
+    cfg = cfg or {"program": PROGRAM, "total": 365, "digits": 3, "out_dir": os.path.join(ROOT, "pdf"), "unit": "월"}
+    program, total, nd = cfg["program"], cfg["total"], cfg["digits"]
     d = json.load(open(path, encoding="utf-8"))
     day, typ = int(d["day"]), d["type"]
     mon = months.get(d["month"], {})
     tc = TYPE_COLOR.get(typ, TEAL)
-    out = os.path.join(ROOT, "pdf", f"Day{day:03d}.pdf")
+    out = os.path.join(cfg["out_dir"], f"Day{day:0{nd}d}.pdf")
+    unit = f"{d['month']}{cfg['unit']}"
 
     def page(c, doc):
         c.saveState()
         c.setFillColor(colors.HexColor(NAVY)); c.rect(0, PAGE_H - 11 * mm, PAGE_W, 11 * mm, fill=1, stroke=0)
         c.setFillColor(colors.white); c.setFont("NanumB", 8.5)
-        c.drawString(MARGIN, PAGE_H - 7 * mm, f"{PROGRAM}  ·  DAY {day:03d} / 365")
-        c.setFont("Nanum", 8.5); c.drawRightString(PAGE_W - MARGIN, PAGE_H - 7 * mm, f"{d['month']}월  {mon.get('title', '')}")
+        c.drawString(MARGIN, PAGE_H - 7 * mm, f"{program}  ·  DAY {day:0{nd}d} / {total}")
+        c.setFont("Nanum", 8.5); c.drawRightString(PAGE_W - MARGIN, PAGE_H - 7 * mm, f"{unit}  {mon.get('title', '')}")
         # progress bar
         c.setFillColor(colors.HexColor("#e3e8ee")); c.rect(MARGIN, 11 * mm, AVAIL, 1.6 * mm, fill=1, stroke=0)
-        c.setFillColor(colors.HexColor(GOLD)); c.rect(MARGIN, 11 * mm, AVAIL * day / 365, 1.6 * mm, fill=1, stroke=0)
+        c.setFillColor(colors.HexColor(GOLD)); c.rect(MARGIN, 11 * mm, AVAIL * day / total, 1.6 * mm, fill=1, stroke=0)
         c.setFillColor(colors.HexColor("#777777")); c.setFont("Nanum", 7.5)
-        c.drawString(MARGIN, 7 * mm, f"연간 진도 {day / 365 * 100:.1f}%")
+        c.drawString(MARGIN, 7 * mm, f"과정 진도 {day / total * 100:.1f}%")
         c.drawRightString(PAGE_W - MARGIN, 7 * mm, f"{doc.page}")
         c.restoreState()
 
     doc = BaseDocTemplate(out, pagesize=(PAGE_W, PAGE_H), leftMargin=MARGIN, rightMargin=MARGIN, topMargin=18 * mm, bottomMargin=18 * mm,
-                          title=f"Day {day:03d} {d['title']}", author=PROGRAM)
+                          title=f"Day {day:0{nd}d} {d['title']}", author=program)
     doc.addPageTemplates([PageTemplate("p", frames=[Frame(MARGIN, 16 * mm, AVAIL, PAGE_H - 33 * mm)], onPage=page)])
     st = []
-    head = Table([[Paragraph(f"DAY<br/><font size=30>{day:03d}</font>", ParagraphStyle("dn", fontName="NanumEB", fontSize=11, leading=30, textColor=colors.white, alignment=TA_CENTER)),
+    head = Table([[Paragraph(f"DAY<br/><font size=30>{day:0{nd}d}</font>", ParagraphStyle("dn", fontName="NanumEB", fontSize=11, leading=30, textColor=colors.white, alignment=TA_CENTER)),
                    [Paragraph(typ, ParagraphStyle("ty", fontName="NanumB", fontSize=10, textColor=colors.HexColor(tc), leading=14)),
                     Paragraph(fmt(d["title"]), ParagraphStyle("tt", fontName="NanumEB", fontSize=18, leading=24, textColor=colors.HexColor(NAVY), wordWrap="CJK")),
-                    Paragraph(f"{d['month']}월 · {fmt(mon.get('title', ''))} · {mon.get('level', '')}  |  예상 학습시간 {fmt(d.get('time', ''))}", S["small"])]]],
+                    Paragraph(f"{unit} · {fmt(mon.get('title', ''))} · {mon.get('level', '')}  |  예상 학습시간 {fmt(d.get('time', ''))}", S["small"])]]],
                  colWidths=[30 * mm, AVAIL - 30 * mm])
     head.setStyle(TableStyle([("BACKGROUND", (0, 0), (0, 0), colors.HexColor(tc)), ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                               ("LEFTPADDING", (1, 0), (1, 0), 12), ("TOPPADDING", (0, 0), (-1, -1), 8), ("BOTTOMPADDING", (0, 0), (-1, -1), 10)]))
@@ -397,7 +401,60 @@ def build_course30():
     return out, doc.page
 
 
+def build_week30(week):
+    """Render 30-day course daily lessons for one week, plus a bound weekly volume with a cover."""
+    c30 = json.load(open(os.path.join(ROOT, "syllabus30.json"), encoding="utf-8"))
+    weeks = {w["week"]: w for w in c30["weeks"]}
+    base = os.path.join(ROOT, "..", "study30")
+    cfg = {"program": c30["title"], "total": 30, "digits": 2, "out_dir": os.path.join(base, "pdf"), "unit": "주차"}
+    os.makedirs(cfg["out_dir"], exist_ok=True)
+    outs = []
+    for x in [d for d in c30["days"] if d["week"] == week]:
+        p = os.path.join(base, "days", f"day{x['day']:02d}.json")
+        if not os.path.exists(p):
+            print("missing", p); continue
+        o, n = build_day(p, weeks, cfg); outs.append((o, x, n)); print(f"{n:3d} pages  {os.path.basename(o)}")
+    w = weeks[week]
+    cov = os.path.join(cfg["out_dir"], f"_cover_w{week}.pdf")
+
+    def cover(c, doc):
+        c.saveState()
+        c.setFillColor(colors.HexColor(NAVY)); c.rect(0, 0, PAGE_W, PAGE_H, fill=1, stroke=0)
+        c.setFillColor(colors.HexColor(GOLD)); c.setFont("NanumB", 11)
+        c.drawString(MARGIN, PAGE_H - 32 * mm, f"FIXED INCOME 30-DAY INTENSIVE  ·  WEEK {week}")
+        c.setFillColor(colors.white); c.setFont("NanumEB", 30)
+        c.drawString(MARGIN, PAGE_H * 0.74, c30["title"])
+        c.setFont("NanumEB", 22); c.drawString(MARGIN, PAGE_H * 0.74 - 40, f"{week}주차  {w['title']}")
+        c.setFont("Nanum", 11); c.setFillColor(colors.HexColor("#c9d3e0"))
+        c.drawString(MARGIN, PAGE_H * 0.74 - 64, f"수준 · {w['level']}    교재 {len(outs)}편 · {sum(n for _, _, n in outs)}쪽")
+        y = PAGE_H * 0.52
+        for o, x, n in outs:
+            c.setFillColor(colors.HexColor({"L": "#2a9d8f", "D": GOLD, "R": "#8e7cc3"}[x["type"]]))
+            c.roundRect(MARGIN, y - 4, 16 * mm, 9 * mm, 2, fill=1, stroke=0)
+            c.setFillColor(colors.white); c.setFont("NanumB", 10); c.drawCentredString(MARGIN + 8 * mm, y + 2, f"DAY {x['day']:02d}")
+            c.setFont("NanumB", 12); c.drawString(MARGIN + 20 * mm, y + 2, x["title"])
+            c.setFont("Nanum", 8.5); c.setFillColor(colors.HexColor("#c9d3e0")); c.drawString(MARGIN + 20 * mm, y - 9, f"{TYPE_NAME[x['type']]} · 산출물: {x['deliverable']}")
+            y -= 15 * mm
+        p = Paragraph(fmt(w["goal"]), ParagraphStyle("g", fontName="Nanum", fontSize=10, leading=16, textColor=colors.HexColor("#d5dde8"), wordWrap="CJK"))
+        _, h = p.wrap(AVAIL, 100); p.drawOn(c, MARGIN, 30 * mm)
+        c.setFillColor(colors.white); c.setFont("Nanum", 9); c.drawString(MARGIN, 18 * mm, "교육·연수용 교재 | 투자 권유 아님 | 예시·가상 수치 포함")
+        c.restoreState()
+
+    doc = BaseDocTemplate(cov, pagesize=(PAGE_W, PAGE_H))
+    doc.addPageTemplates([PageTemplate("c", frames=[Frame(0, 0, PAGE_W, PAGE_H)], onPage=cover)])
+    doc.build([Spacer(1, 1)])
+    from pypdf import PdfWriter
+    wtr = PdfWriter(); wtr.append(cov); page = 1
+    for o, x, n in outs:
+        wtr.append(o, outline_item=f"DAY {x['day']:02d}  {x['title']}"); page += n
+    bound = os.path.join(base, f"채권투자_30일과정_{week}주차_교재.pdf")
+    wtr.write(bound); os.remove(cov)
+    return bound, 1 + sum(n for _, _, n in outs)
+
+
 if __name__ == "__main__":
+    if "--week" in sys.argv:
+        o, n = build_week30(int(sys.argv[sys.argv.index("--week") + 1])); print(f"{n:3d} pages  {os.path.basename(o)}"); sys.exit()
     if "--30" in sys.argv:
         o, n = build_course30(); print(f"{n:3d} pages  {os.path.basename(o)}"); sys.exit()
     months = load_syllabus()
