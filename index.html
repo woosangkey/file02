@@ -186,8 +186,24 @@ footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 2
   let rate = store.get("rate", 0.9);
 
   // 녹음 파일(audio/wNN.mp3)에서 문장 구간을 찾아 재생. 없으면 기기 음성으로.
-  let actx = null, src = null, token = 0;
-  const buffers = {};
+  // iPad/iPhone 무음 모드에서도 소리가 나도록 Web Audio 대신 <audio> 요소로 재생
+  let token = 0, watch = 0;
+  const player = new Audio();
+  player.preload = "auto";
+  player.addEventListener("error", () => audioMsg("음성 파일을 불러오지 못했어요. 인터넷 연결을 확인한 뒤 다시 눌러 주세요."));
+  // 주차 음성 파일을 통째로 미리 받아 두면 어느 서버에서든 원하는 위치로 바로 이동할 수 있다
+  const fileUrl = (n) => `audio/w${String(n).padStart(2, "0")}.mp3`;
+  const blobUrl = {}, loading = {};
+  function prefetch(n) {
+    if (blobUrl[n] || loading[n] || !AI || !AI[n]) return;
+    loading[n] = fetch(fileUrl(n))
+      .then((r) => r.ok ? r.blob() : Promise.reject(r.status))
+      .then((b) => { blobUrl[n] = URL.createObjectURL(b); })
+      .catch(() => {})
+      .finally(() => { delete loading[n]; });
+  }
+  let curUrl = "";
+  function audioMsg(t) { $("#voiceWarn").innerHTML = t ? `<div class="card warn">${esc(t)}</div>` : ""; }
   function findClip(text, who) {
     if (!AI) return null;
     const cur = weekOf(day);
@@ -199,15 +215,6 @@ footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 2
     }
     return null;
   }
-  function loadWeek(n) {
-    if (!buffers[n]) {
-      buffers[n] = fetch(`audio/w${String(n).padStart(2, "0")}.mp3`)
-        .then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
-        .then((b) => new Promise((ok, ng) => actx.decodeAudioData(b, ok, ng)))
-        .catch((e) => { delete buffers[n]; throw e; });
-    }
-    return buffers[n];
-  }
   function speakTTS(text, who, onend) {
     if (!("speechSynthesis" in window)) { onend && onend(); return; }
     const u = new SpeechSynthesisUtterance(text);
@@ -218,24 +225,43 @@ footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 2
   }
   function speak(text, who, onend) {
     const clip = findClip(text, who);
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!clip || !AC) { speakTTS(text, who, onend); return; }
-    if (!actx) actx = new AC();
-    if (actx.state === "suspended") actx.resume();
+    if (!clip) { speakTTS(text, who, onend); return; }
     const my = ++token;
-    loadWeek(clip.week).then((buf) => {
+    cancelAnimationFrame(watch);
+    const url = blobUrl[clip.week] || fileUrl(clip.week);
+    if (curUrl !== url) { player.src = curUrl = url; }
+    prefetch(clip.week);
+    player.defaultPlaybackRate = player.playbackRate = rate;
+    const end = clip.start + clip.dur;
+    const tick = () => {
       if (my !== token) return;
-      src = actx.createBufferSource();
-      src.buffer = buf;
-      src.playbackRate.value = rate;
-      src.connect(actx.destination);
-      src.onended = () => { if (my === token) { src = null; onend && onend(); } };
-      src.start(0, clip.start, clip.dur);
-    }).catch(() => { if (my === token) speakTTS(text, who, onend); });
+      if (player.currentTime >= end || player.ended) { player.pause(); onend && onend(); }
+      else watch = requestAnimationFrame(tick);
+    };
+    if (player.readyState >= 1) {
+      player.currentTime = clip.start;
+    } else {
+      // 첫 재생: 터치한 순간 play() 해야 iOS가 허용하므로, 위치를 맞출 때까지 음소거
+      player.muted = true;
+      player.addEventListener("loadedmetadata", () => { player.currentTime = clip.start; player.muted = false; }, { once: true });
+    }
+    const p = player.play();
+    if (p) p.then(() => {
+      if (my !== token) return;
+      audioMsg("");
+      player.playbackRate = rate;
+      cancelAnimationFrame(watch);
+      watch = requestAnimationFrame(tick);
+    }).catch((e) => {
+      if (my !== token) return;
+      player.muted = false;
+      audioMsg(`소리를 재생하지 못했어요 (${e.name}). 🔊 버튼을 한 번 더 눌러 보세요.`);
+    });
   }
   function stop() {
     token++;
-    if (src) { try { src.stop(); } catch {} src = null; }
+    cancelAnimationFrame(watch);
+    player.pause();
     if ("speechSynthesis" in window) speechSynthesis.cancel();
   }
   function playLines(lines, onLine) {
@@ -331,6 +357,7 @@ footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 2
   function render() {
     stop();
     store.set("lastDay", day);
+    prefetch(weekOf(Math.min(day, 364)));
     const isFinal = day === LAST;
     const w = W[weekOf(day) - 1];
     const r = isFinal ? C.final : C.routine[dowOf(day) - 1];
