@@ -26,3 +26,10 @@
 - `study/채권투자_365일_학습과정_제안서.pdf` — 과정 설계, 연간 로드맵, 평가 체계, 제작 방안, 365일 일차별 커리큘럼
 - `study/pdf/Day001.pdf`, `Day006.pdf` — 샘플 교재 (학습일 / 실전 드릴, 각 10쪽)
 - 원고: `study/syllabus/m01~m12.json`, `study/days/dayNNN.json` · 재생성: `python3 scripts/build_study.py`
+
+## 채권투자 30일 집중 과정 (전체 교재, 2026년 10월 시장 반영)
+
+- `study30/채권투자_30일_집중과정_전체교재.pdf` — 30일 전체 합본 (345쪽, 주차·일차 책갈피)
+- `study30/채권투자_30일과정_N주차_교재.pdf` — 주차별 합본 (표지 + 2026년 10월 채권시장 브리핑 + 일일 교재)
+- `study/채권투자_30일_집중과정_커리큘럼.pdf` — 커리큘럼
+- 원고: `study30/days/day01~30.json`, 시장 기준값: `study30/MARKET_2026-10.md` · 재생성: `python3 scripts/build_study.py --all30`

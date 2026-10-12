@@ -56,12 +56,12 @@ def styles(accent):
 
 
 SUB = dict(zip("₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎ₐₑₒₓₕₖₗₘₙₚₛₜᵢ", "0123456789+-=()aeoxhklmnpsti"))
-SUP = dict(zip("⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ᵐᵗᵏᴺⁿ", "0123456789+-=()mtkNn"))
+SUP = dict(zip("⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ᵐᵗᵏᴺⁿᵃᵇ", "0123456789+-=()mtkNnab"))
 
 
 def glyphsafe(t):
     """Map characters missing from Nanum fonts to safe equivalents / sub-superscript markup."""
-    t = t.replace("\u2212", "-")
+    t = t.replace("\u2212", "-").replace("\u2610", "\u25a1")
     out, mode = [], None
     for ch in t:
         m = "sub" if ch in SUB else "super" if ch in SUP else None

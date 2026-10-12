@@ -496,7 +496,28 @@ def build_week30(week):
     return bound, len(PdfReader(bound).pages)
 
 
+def build_all30():
+    """Bind all weekly volumes of the 30-day course into one book with nested bookmarks."""
+    from pypdf import PdfWriter, PdfReader
+    base = os.path.join(ROOT, "..", "study30")
+    wtr = PdfWriter()
+    for w in range(1, 6):
+        o, _ = build_week30(w)
+        start = len(wtr.pages)
+        r = PdfReader(o)
+        wtr.append(o, import_outline=False)
+        parent = wtr.add_outline_item(f"{w}주차" if w < 5 else "마무리: 캡스톤·수료", start)
+        for item in r.outline:
+            if not isinstance(item, list):
+                wtr.add_outline_item(item.title, start + r.get_destination_page_number(item), parent=parent)
+    out = os.path.join(base, "채권투자_30일_집중과정_전체교재.pdf")
+    wtr.write(out)
+    return out, len(PdfReader(out).pages)
+
+
 if __name__ == "__main__":
+    if "--all30" in sys.argv:
+        o, n = build_all30(); print(f"{n:3d} pages  {os.path.basename(o)}"); sys.exit()
     if "--week" in sys.argv:
         o, n = build_week30(int(sys.argv[sys.argv.index("--week") + 1])); print(f"{n:3d} pages  {os.path.basename(o)}"); sys.exit()
     if "--30" in sys.argv:
