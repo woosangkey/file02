@@ -62,6 +62,13 @@ S = {
 }
 
 
+_fmt0 = fmt
+
+
+def fmt(text):
+    return _fmt0(str(text).replace("\u2248", "\u2252"))
+
+
 def P(text, style):
     return Paragraph(fmt(text), S[style] if isinstance(style, str) else style)
 

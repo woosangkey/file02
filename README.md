@@ -33,3 +33,9 @@
 - `study30/채권투자_30일과정_N주차_교재.pdf` — 주차별 합본 (표지 + 2026년 10월 채권시장 브리핑 + 일일 교재)
 - `study/채권투자_30일_집중과정_커리큘럼.pdf` — 커리큘럼
 - 원고: `study30/days/day01~30.json`, 시장 기준값: `study30/MARKET_2026-10.md` · 재생성: `python3 scripts/build_study.py --all30`
+
+## 양동석의 월배당 설계 (단행본, 249쪽)
+
+- `divbook/양동석의_월배당설계.pdf` — 준비마당(원칙 8) + 실전마당 1~5, 크라운판(176×248mm)
+- 원고: `divbook/units/*.json`, 집필 기준서: `divbook/BRIEF.md`, 출간 전 확인 목록: `divbook/출간전_확인목록.md`
+- 재생성: `python3 scripts/build_divbook.py`
