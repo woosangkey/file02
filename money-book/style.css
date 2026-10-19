@@ -1,0 +1,118 @@
+/* 처음 만나는 재테크 교과서 — 조판 스타일 (신국판 152×225mm) */
+:root {
+  --navy: #2f4f9a;
+  --navy-dark: #1f3a7a;
+  --navy-light: #6f88c4;
+  --band: #4a66ad;
+  --ink: #222;
+  --gray: #8a93a6;
+  --rule: #b9c4de;
+  --tint: #eef2fa;
+}
+
+@page {
+  size: 152mm 225mm;
+  margin: 20mm 17mm 21mm 17mm;
+}
+@page :left  { margin-left: 16mm; margin-right: 21mm; }
+@page :right { margin-left: 21mm; margin-right: 16mm; }
+
+/* 앞부분(표지·차례·프롤로그): 쪽번호만 */
+@page front:left  { @bottom-left  { content: counter(page); font: 8pt "Noto Sans CJK KR"; color: var(--gray); } }
+@page front:right { @bottom-right { content: counter(page); font: 8pt "Noto Sans CJK KR"; color: var(--gray); } }
+@page blank { @bottom-left { content: none; } @bottom-right { content: none; } }
+
+/* 본문: 왼쪽 = 쪽번호 + 책제목, 오른쪽 = 파트명 + 쪽번호, 바깥 여백에 파트 탭 */
+@page body:left {
+  @bottom-left { content: counter(page) "   처음 만나는 재테크 교과서"; font: 8pt "Noto Sans CJK KR"; color: var(--gray); }
+}
+PART_PAGE_RULES
+
+@page partopen { @bottom-left { content: none; } @bottom-right { content: none; } }
+
+html { font-family: "Noto Serif CJK KR", "NanumMyeongjo", serif; color: var(--ink); }
+body { margin: 0; font-size: 9.6pt; line-height: 1.85; }
+h1, h2, h3, h4, .toc, .band, .box-title, .caption, figcaption, .part-open, .cover { word-break: keep-all; }
+.sans, h1, h2, h3, h4, table, .box, .toc, .band, figcaption, .tag { font-family: "Noto Sans CJK KR", "NanumBarunGothic", sans-serif; }
+
+/* ---------- 표지 ---------- */
+.cover { page: blank; height: 184mm; display: flex; flex-direction: column; justify-content: center; text-align: center; break-after: page; }
+.cover .eyebrow { font-family: "Noto Sans CJK KR"; color: var(--navy-light); letter-spacing: .3em; font-size: 9pt; }
+.cover h1 { font-size: 26pt; line-height: 1.35; color: var(--navy-dark); margin: 6mm 0 4mm; font-weight: 900; }
+.cover .sub { font-family: "Noto Sans CJK KR"; font-size: 9.5pt; color: #555; }
+.cover .bar { width: 26mm; height: 1.4mm; background: var(--navy); margin: 8mm auto; }
+.cover .author { font-family: "Noto Sans CJK KR"; font-size: 10pt; color: var(--navy-dark); margin-top: 12mm; }
+
+/* ---------- 차례 ---------- */
+.toc { page: front; break-before: right; font-size: 8.6pt; line-height: 1.5; }
+.toc .toc-title { font-size: 10pt; font-weight: 700; color: #333; margin: 0 0 9mm; }
+.toc .row { display: flex; align-items: baseline; margin: 0 0 3.2mm 9mm; }
+.toc .row.front { margin-left: 0; }
+.toc .row .t { flex: 0 1 auto; color: #2a2a2a; }
+.toc .row .t small { display: block; color: var(--gray); font-size: 7pt; margin-top: .6mm; }
+.toc .row .lead { flex: 1 1 auto; }
+.toc .row .p { flex: 0 0 auto; color: var(--gray); font-size: 7.8pt; padding-left: 2mm; }
+.toc .row .p::before { content: "··· "; letter-spacing: .05em; }
+.toc .part { display: flex; align-items: center; margin: 9mm 0 5mm; break-inside: avoid; break-after: avoid; }
+.toc .part .pill { border: .35mm solid var(--navy); color: var(--navy); border-radius: 20mm; padding: .6mm 2.6mm; font-size: 8pt; font-weight: 700; margin-right: 2.6mm; white-space: nowrap; }
+.toc .part .name { font-size: 13.5pt; font-weight: 700; color: var(--navy-dark); white-space: nowrap; }
+.toc .part .line { flex: 1; height: .3mm; background: var(--navy-light); margin-left: 2.5mm; }
+.toc .row.todo .t { color: #9aa; }
+
+/* ---------- 프롤로그 ---------- */
+.prologue { page: front; break-before: right; }
+.prologue h1 { font-size: 15pt; color: var(--navy-dark); margin: 14mm 0 2mm; text-align: center; font-weight: 400; }
+.prologue h1 b { display: block; font-weight: 900; font-size: 18pt; }
+.prologue .kicker { text-align: center; color: var(--navy-light); font-family: "Noto Sans CJK KR"; font-size: 8pt; letter-spacing: .25em; }
+.prologue .sig { text-align: right; margin-top: 8mm; font-family: "Noto Sans CJK KR"; color: #555; font-size: 9pt; }
+
+/* ---------- 파트 표지 ---------- */
+.part-open { page: partopen; break-before: right; break-after: page; height: 184mm; display: flex; flex-direction: column; justify-content: center; }
+.part-open .num { font-family: "Noto Sans CJK KR"; color: var(--navy-light); font-size: 11pt; letter-spacing: .3em; font-weight: 700; }
+.part-open .num b { font-size: 46pt; color: var(--navy); letter-spacing: 0; display: block; line-height: 1; margin: 2mm 0 4mm; }
+.part-open h2 { font-size: 21pt; color: var(--navy-dark); margin: 0 0 8mm; font-weight: 900; }
+.part-open ul { list-style: none; padding: 0; margin: 0; border-top: .3mm solid var(--rule); font-family: "Noto Sans CJK KR"; font-size: 8.8pt; }
+.part-open li { padding: 2.2mm 0; border-bottom: .2mm dotted var(--rule); color: #333; }
+.part-open li span { color: var(--navy); font-weight: 700; margin-right: 3mm; }
+
+/* ---------- 꼭지(섹션) 시작 ---------- */
+.section { break-before: right; }
+.section .opener { text-align: center; padding-top: 10mm; margin-bottom: 14mm; }
+.section .opener h1 { margin: 0; font-size: 19pt; line-height: 1.32; color: var(--navy); font-weight: 400; }
+.section .opener h1 b { display: block; font-weight: 900; color: var(--navy-dark); }
+.section .opener .band { margin: 6mm -1mm 0; background: var(--band); color: #fff; font-size: 8.4pt; padding: 2.2mm 3mm; font-weight: 500; letter-spacing: .02em; }
+
+/* ---------- 본문 ---------- */
+p { margin: 0; text-indent: 1em; text-align: justify; orphans: 2; widows: 2; }
+h3 + p, h4 + p, .box + p, table + p, figure + p, ul + p, ol + p, .noindent { text-indent: 0; }
+h3 { font-size: 10.4pt; color: var(--navy-dark); margin: 9mm 0 3.5mm; padding-bottom: 1.2mm; display: inline-block; border-bottom: .35mm dotted var(--navy-light); break-after: avoid; }
+h4 { font-size: 9.4pt; color: var(--navy); margin: 5mm 0 2mm; break-after: avoid; }
+strong { font-family: "Noto Sans CJK KR"; font-weight: 700; font-size: .96em; color: #111; }
+em { font-style: normal; color: var(--navy); font-weight: 700; }
+ul, ol { margin: 2mm 0 2mm 0; padding-left: 5mm; }
+li { margin: .6mm 0; }
+blockquote { margin: 4mm 0; padding: 0 0 0 4mm; border-left: .8mm solid var(--navy-light); color: #333; font-size: 9.2pt; }
+blockquote p { text-indent: 0; }
+
+/* 표 */
+table { width: 100%; border-collapse: collapse; margin: 4mm 0 5mm; font-size: 7.6pt; line-height: 1.5; break-inside: avoid; }
+th { background: var(--navy); color: #fff; font-weight: 700; padding: 1.6mm 1.8mm; text-align: center; }
+td { border-bottom: .2mm solid var(--rule); padding: 1.5mm 1.8mm; vertical-align: top; }
+tr:nth-child(even) td { background: var(--tint); }
+.tbl { break-inside: avoid; }
+.caption { font-family: "Noto Sans CJK KR"; font-size: 7.4pt; color: var(--navy); font-weight: 700; margin-top: 5mm; }
+
+/* 박스: 머니 포인트 / 한 줄 정리 */
+.box { margin: 5mm 0; padding: 3.5mm 4mm; background: var(--tint); border-top: .7mm solid var(--navy); font-size: 8.4pt; line-height: 1.7; break-inside: avoid; }
+.box .box-title { color: var(--navy); font-weight: 900; font-size: 8.8pt; margin-bottom: 1.5mm; }
+.box p { text-indent: 0; text-align: left; }
+.box ul { margin: 1mm 0; }
+.box.summary { background: #fff; border: .3mm solid var(--navy); border-top-width: .3mm; }
+.box.summary .box-title::before { content: "■ "; }
+
+figure { margin: 5mm 0; break-inside: avoid; }
+figure svg { width: 100%; height: auto; }
+figcaption { font-size: 7.2pt; color: #666; margin-top: 1.5mm; }
+
+.endnote { font-family: "Noto Sans CJK KR"; font-size: 6.8pt; color: #888; margin-top: 6mm; border-top: .2mm solid #ccc; padding-top: 2mm; line-height: 1.5; }
+.endnote p { text-indent: 0; }
