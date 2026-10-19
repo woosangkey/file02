@@ -151,3 +151,13 @@ figcaption { font-size: 7.2pt; color: #666; margin-top: 1.5mm; }
 ul.check { list-style: none; padding-left: 0; }
 ul.check li::before { content: "☐ "; color: var(--navy); font-weight: 700; }
 .glance table { margin: 0; font-size: 7.4pt; }
+
+/* 꼭지 끝 정리: 출처 각주가 혼자 다음 쪽으로 넘어가지 않게 */
+.box.summary { break-after: avoid; }
+.endnote { break-before: avoid; break-inside: avoid; }
+
+/* 긴 표(12행 초과)는 쪽을 넘겨도 되게: 머리행 반복 */
+.tbl.long, .tbl.long table { break-inside: auto; }
+.tbl.long .caption { break-after: avoid; }
+thead { display: table-header-group; }
+tr { break-inside: avoid; }

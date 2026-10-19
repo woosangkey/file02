@@ -33,7 +33,18 @@ def read_section(sid):
     body_html = subprocess.run(
         ["pandoc", "-f", "markdown+raw_html-implicit_figures-smart", "-t", "html5", "--wrap=none"],
         input=body, capture_output=True, text=True, check=True).stdout
+    body_html = mark_long_tables(body_html)
     return meta, body_html
+
+
+def mark_long_tables(body_html):
+    """12행을 넘는 표를 감싼 div.tbl 에 long 클래스를 붙여 쪽 나눔을 허용한다."""
+    def repl(m):
+        block = m.group(0)
+        if block.count("<tr") > 13:
+            block = block.replace('<div class="tbl">', '<div class="tbl long">', 1)
+        return block
+    return re.sub(r'<div class="tbl">.*?</table>', repl, body_html, flags=re.S)
 
 
 def curly_quotes(text):
@@ -59,7 +70,7 @@ def two_line_title(t):
 def part_page_rules():
     rules = []
     groups = [(f"p{n}", f"PART {n}", name, str(n)) for n, name, _ in PARTS]
-    groups.append(("pa", "별첨", "별첨", "+"))
+    groups.append(("pa", "APPENDIX", "부록", "+"))
     for page, label, name, tab in groups:
         tab_style = (f'content: "{tab}"; background: {NAVY}; color: #fff; font: 700 9pt "Noto Sans CJK KR"; '
                      "text-align: center; vertical-align: middle; height: 16mm; width: 6mm;")
