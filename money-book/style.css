@@ -116,3 +116,38 @@ figcaption { font-size: 7.2pt; color: #666; margin-top: 1.5mm; }
 
 .endnote { font-family: "Noto Sans CJK KR"; font-size: 6.8pt; color: #888; margin-top: 6mm; border-top: .2mm solid #ccc; padding-top: 2mm; line-height: 1.5; }
 .endnote p { text-indent: 0; }
+
+/* ---------- 한눈에 보기(인포그래픽) 컴포넌트 ---------- */
+.glance { margin: 6mm 0; border: .35mm solid var(--navy); break-inside: avoid; font-family: "Noto Sans CJK KR", sans-serif; font-size: 7.8pt; line-height: 1.55; }
+.glance > .g-title { background: var(--navy); color: #fff; font-weight: 700; font-size: 8.6pt; padding: 1.8mm 3mm; word-break: keep-all; }
+.glance > .g-title::before { content: "한눈에 보기 ｜ "; color: #c9d5f2; font-weight: 500; }
+.glance > .g-body { padding: 3.5mm; }
+.glance p { text-indent: 0; text-align: left; }
+.glance .g-note { color: #666; font-size: 7pt; margin-top: 2mm; }
+
+/* 카드 그리드: <div class="cards c2|c3"> <div class="card"><b>제목</b>내용</div> ... */
+.cards { display: grid; gap: 2.5mm; grid-template-columns: 1fr 1fr; }
+.cards.c3 { grid-template-columns: 1fr 1fr 1fr; }
+.cards.c4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.card { background: var(--tint); border-radius: 1.5mm; padding: 2.5mm; }
+.card > b:first-child { display: block; color: var(--navy-dark); font-size: 8.4pt; margin-bottom: 1mm; word-break: keep-all; }
+.card .big { display: block; font-size: 15pt; font-weight: 900; color: var(--navy); line-height: 1.15; margin: 1mm 0; }
+
+/* 단계 흐름: <div class="flow"><div class="step"><b>1</b>내용</div>... */
+.flow { display: flex; align-items: stretch; gap: 4.5mm; }
+.flow .step { flex: 1; position: relative; background: var(--tint); border-top: .8mm solid var(--navy); padding: 2.2mm; text-align: center; border-radius: 0 0 1.5mm 1.5mm; word-break: keep-all; }
+.flow .step > b:first-child { display: block; color: var(--navy); font-size: 10pt; font-weight: 900; }
+.flow .step:not(:last-child)::after { content: "▶"; position: absolute; right: -4.2mm; top: 40%; color: var(--navy-light); font-size: 7pt; }
+
+/* 비교: <div class="vs"><div class="side">…</div><div class="mid">VS</div><div class="side">…</div></div> */
+.vs { display: grid; grid-template-columns: 1fr 9mm 1fr; align-items: stretch; }
+.vs .side { background: var(--tint); padding: 2.5mm; border-radius: 1.5mm; }
+.vs .side > b:first-child { display: block; text-align: center; color: #fff; background: var(--navy); margin: -2.5mm -2.5mm 2mm; padding: 1.4mm; border-radius: 1.5mm 1.5mm 0 0; }
+.vs .side.alt > b:first-child { background: #8a6d2f; }
+.vs .mid { display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--navy-light); }
+.vs ul, .cards ul, .flow ul { margin: 0; padding-left: 3.5mm; }
+
+/* 체크리스트 */
+ul.check { list-style: none; padding-left: 0; }
+ul.check li::before { content: "☐ "; color: var(--navy); font-weight: 700; }
+.glance table { margin: 0; font-size: 7.4pt; }
