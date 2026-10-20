@@ -59,3 +59,4 @@ tr:nth-child(even) td { background: #f6f8fc; }
 ul.check { list-style:none; padding-left:0; } ul.check li::before { content:"☐ "; color: var(--navy2); font-weight:700; }
 .endnote { font-size: 7.4pt; color:#888; border-top: .2mm solid #ccc; padding-top: 2mm; margin-top: 6mm; line-height:1.5; }
 figure { margin: 4mm 0; break-inside: avoid; } figure svg { width:100%; height:auto; } figcaption { font-size:7.6pt; color:#666; }
+.box.summary { break-after: avoid; } .endnote { break-before: avoid; break-inside: avoid; }
