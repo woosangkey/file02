@@ -336,6 +336,7 @@ article.chap,.toc{zoom:var(--rz,1)}
 .dock .hm button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 .dock label.tg{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);cursor:pointer}
 .dock.min .row~*{display:none}
+.dock.typing{visibility:hidden}
 
 /* 모아 보기 */
 .gather{position:fixed;inset:0;z-index:40;background:rgba(20,28,30,.38);display:flex;justify-content:flex-end}
@@ -14275,7 +14276,9 @@ VS
   /* 붙는 쪽에 따라 모양이 바뀜: 왼쪽·오른쪽 끝 → 세로, 위·아래 끝 → 가로 */
   var vv=window.visualViewport, pos={side:'b',at:-1}, drag=null, M=12;
   try{var ps=JSON.parse(localStorage.getItem('ppnote-dock2')||'null');if(ps&&ps.side)pos=ps;}catch(e){}
-  function view(){var sc=vv?vv.scale:1;return {sc:sc,ox:vv?vv.offsetLeft:0,oy:vv?vv.offsetTop:0,W:vv?vv.width*sc:window.innerWidth,H:vv?vv.height*sc:window.innerHeight};}
+  function view(){ // 손가락 확대(scale>1)일 때만 보이는 영역 오프셋을 씀. 키보드가 올라와 화면이 밀린 것(scale=1)은 무시 → 도구 창이 화면 밖으로 안 나감
+    var sc=vv?vv.scale:1; if(!vv||sc<1.02) return {sc:1,ox:0,oy:0,W:window.innerWidth,H:window.innerHeight};
+    return {sc:sc,ox:vv.offsetLeft,oy:vv.offsetTop,W:vv.width*sc,H:vv.height*sc};}
   function topGap(){var b=document.querySelector('.bar');var r=b?b.getBoundingClientRect():null;return r&&r.bottom>0?r.bottom+M:M;}
   function setShape(){dock.classList.toggle('vert',pos.side==='l'||pos.side==='r');}
   function placeDock(fx,fy){
@@ -14290,6 +14293,12 @@ VS
   setShape();
   if(vv){vv.addEventListener('resize',function(){placeDock();});vv.addEventListener('scroll',function(){placeDock();});}
   window.addEventListener('resize',function(){placeDock();}); window.addEventListener('orientationchange',function(){setTimeout(placeDock,300);});
+  /* 검색창 등에 글자를 칠 때(키보드)는 도구 창을 잠시 숨기고, 끝나면 제자리에 다시 놓음 */
+  function isField(t){return t&&t.matches&&t.matches('input:not([type=checkbox]):not([type=radio]),textarea,select,[contenteditable]')&&!t.closest('.myans');}
+  document.addEventListener('focusin',function(e){if(isField(e.target))dock.classList.add('typing');});
+  document.addEventListener('focusout',function(e){if(!isField(e.target))return;dock.classList.remove('typing');[0,250,600,1200].forEach(function(t){setTimeout(function(){placeDock();},t);});});
+  var sT=null; window.addEventListener('scroll',function(){clearTimeout(sT);sT=setTimeout(function(){placeDock();},120);},{passive:true});
+  document.addEventListener('chapshow',function(){setTimeout(function(){placeDock();},50);});
   var grip=dock.querySelector('.grip');
   grip.addEventListener('pointerdown',function(e){e.preventDefault();try{grip.setPointerCapture(e.pointerId);}catch(err){}drag={x:e.clientX,y:e.clientY,sx:dock._sx||0,sy:dock._sy||0};dock.classList.add('dragging');});
   grip.addEventListener('pointermove',function(e){if(!drag)return;var sc=view().sc;placeDock(drag.sx+(e.clientX-drag.x)*sc,drag.sy+(e.clientY-drag.y)*sc);});
