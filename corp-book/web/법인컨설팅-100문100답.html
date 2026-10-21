@@ -14317,3 +14317,18 @@ VS
 })();
 </script>
 
+<script>
+/* 진단 줄: 펜슬 입력이 어디에 닿는지 도구 창 아래에 표시 (iPad 문제 확인용) */
+(function(){
+  function desc(el){ if(!el||!el.tagName) return "없음"; var c=(el.getAttribute&&el.getAttribute("class"))||""; return el.tagName.toLowerCase()+(c?"."+String(c).split(" ").slice(0,2).join("."):""); }
+  var line=null, last={};
+  function ensure(){ var d=document.querySelector(".dock"); if(!d) return null; if(!line){ line=document.createElement("div"); line.id="diag"; line.style.cssText="font:11px/1.45 monospace;color:var(--muted);padding:2px 4px;max-width:330px;word-break:break-all"; d.appendChild(line);} return line; }
+  function show(){ var l=ensure(); if(!l) return; var b=document.body.className.match(/tool-\w+/); var nInk=document.querySelectorAll("svg.ink").length, nOn=document.querySelectorAll("svg.ink path").length;
+    l.textContent="진단 · 도구 "+(b?b[0].slice(5):"없음")+" · 입력 "+(last.type||"-")+"/"+(last.pt||"-")+(last.tt?"/"+last.tt:"")+" · 닿은 곳 "+(last.tg||"-")+" · 층 "+nInk+" · 획 "+nOn+(last.pc?" · 취소됨":""); }
+  document.addEventListener("pointerdown",function(e){ last={type:"down",pt:e.pointerType,tg:desc(e.target),pc:false}; show(); },true);
+  document.addEventListener("pointercancel",function(e){ last.pc=true; show(); },true);
+  document.addEventListener("pointerup",function(){ setTimeout(show,50); },true);
+  document.addEventListener("touchstart",function(e){ var t=e.touches[0]; if(t) last.tt=t.touchType||"?"; },{capture:true,passive:true});
+  setInterval(function(){ if(document.querySelector(".dock:not([hidden])")) show(); },1500);
+})();
+</script>
