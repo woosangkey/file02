@@ -352,6 +352,27 @@ article.chap,.toc{zoom:var(--rz,1)}
 .gather .empty{color:var(--muted);font-size:13.5px;line-height:1.7;padding:12px 0}
 @media print{.dock,.gather,.myans>button{display:none!important}.ink{display:none}}
 
+
+/* notes.js가 바에 붙이는 필기·글자 크기 버튼 */
+.bar #notesbtn,.bar .zseg button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:6px 10px;white-space:nowrap;cursor:pointer;min-height:34px}
+.bar #notesbtn{order:9;background:var(--coral);border-color:var(--coral);color:#fff;font-weight:700;padding:6px 14px}
+.bar #notesbtn[aria-pressed="true"]{background:var(--pill);border-color:var(--pill);color:var(--pill-ink)}
+.bar .zseg{order:8;display:inline-flex;flex:none;border:0;gap:0}
+.bar .zseg button{border-radius:0;margin-left:-1px}
+.bar .zseg button:first-child{border-radius:8px 0 0 8px;margin-left:0}
+.bar .zseg button:last-child{border-radius:0 8px 8px 0}
+.bar .zseg #zval{font-size:11.5px;color:var(--muted);min-width:46px}
+@media (max-width:1100px){
+  .bar{flex-wrap:wrap}
+  .brand{order:1}
+  .acts{order:2}
+  .bar .zseg{order:3}
+  .bar #notesbtn{order:4}
+  .bar .sels{order:5;flex:1 1 100%}
+  .bar .sels select{flex:1 1 0;max-width:none}
+  .searchwrap{order:6;flex:1 1 100%;max-width:none}
+}
+@media (max-width:760px){.searchwrap{display:none}.bar.search-on .searchwrap{display:block}}
 </style>
 
 <div class="bar" role="banner" id="bar">
@@ -13713,7 +13734,7 @@ VS
   /* 바 높이 → 스크롤 여백, 모바일 검색 토글, 보기 메뉴 닫기 */
   var bar = $("#bar");
   function barH(){ document.documentElement.style.setProperty("--barh", bar.offsetHeight + "px"); }
-  barH(); window.addEventListener("resize", barH);
+  barH(); window.addEventListener("resize", barH); setTimeout(barH, 300); setTimeout(barH, 1500);
   $("#search-btn").addEventListener("click", function(e){ var on = bar.classList.toggle("search-on"); e.currentTarget.setAttribute("aria-pressed", String(on)); barH(); if (on) qi.focus(); });
   document.addEventListener("click", function(e){ var t = $("#tools"); if (t.open && !e.target.closest("#tools")) t.open = false; });
 
