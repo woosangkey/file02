@@ -99,3 +99,13 @@ article.chap,.toc{zoom:var(--rz,1)}
 .gather .store{font-size:12px;color:var(--muted);margin:0 0 8px}
 .gather .empty{color:var(--muted);font-size:13.5px;line-height:1.7;padding:12px 0}
 @media print{.dock,.gather,.myans>button{display:none!important}.ink{display:none}}
+
+/* 도구 창 세로 모양(화면 왼쪽·오른쪽 끝에 붙었을 때) */
+.dock.vert{display:flex;flex-direction:row;align-items:flex-start;gap:6px;max-height:calc(100vh - 24px);max-width:none}
+.dock.vert .row,.dock.vert .sub{flex-direction:column;flex-wrap:nowrap;align-items:center}
+.dock.vert .sep{width:auto;height:1px;align-self:stretch;margin:2px 4px}
+.dock.vert .sub{padding:2px 0;gap:6px}
+.dock.vert .swl{font-size:9.5px}
+.dock.vert label.tg{flex-direction:column;font-size:10px;text-align:center;max-width:44px}
+.dock.vert .hint,.dock.vert .store{display:none}
+.dock.vert.min{flex-direction:column}

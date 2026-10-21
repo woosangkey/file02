@@ -458,24 +458,36 @@
   showStore();
 
   /* 도구 창 위치: 화면(보이는 영역) 기준으로 고정, 확대해도 같은 크기 */
-  var vv=window.visualViewport, pos={side:'r',y:-1}, drag=null, M=12;
-  try{var ps=JSON.parse(localStorage.getItem('ppnote-dock')||'null');if(ps&&ps.side)pos=ps;}catch(e){}
+  /* 붙는 쪽에 따라 모양이 바뀜: 왼쪽·오른쪽 끝 → 세로, 위·아래 끝 → 가로 */
+  var vv=window.visualViewport, pos={side:'b',at:-1}, drag=null, M=12;
+  try{var ps=JSON.parse(localStorage.getItem('ppnote-dock2')||'null');if(ps&&ps.side)pos=ps;}catch(e){}
   function view(){var sc=vv?vv.scale:1;return {sc:sc,ox:vv?vv.offsetLeft:0,oy:vv?vv.offsetTop:0,W:vv?vv.width*sc:window.innerWidth,H:vv?vv.height*sc:window.innerHeight};}
+  function topGap(){var b=document.querySelector('.bar');var r=b?b.getBoundingClientRect():null;return r&&r.bottom>0?r.bottom+M:M;}
+  function setShape(){dock.classList.toggle('vert',pos.side==='l'||pos.side==='r');}
   function placeDock(fx,fy){
-    if(dock.hidden) return; var v=view(), w=dock.offsetWidth, h=dock.offsetHeight;
-    var sx=fx!=null?fx:(pos.side==='l'?M:v.W-w-M), sy=fy!=null?fy:(pos.y<0?v.H-h-M:pos.y);
+    if(dock.hidden) return; var v=view(), w=dock.offsetWidth, h=dock.offsetHeight, sx, sy;
+    if(fx!=null){sx=fx;sy=fy;}
+    else if(pos.side==='l'||pos.side==='r'){sx=pos.side==='l'?M:v.W-w-M; sy=pos.at<0?(v.H-h)/2:pos.at;}
+    else {sy=pos.side==='t'?topGap():v.H-h-M; sx=pos.at<0?v.W-w-M:pos.at;}
     sx=Math.max(M,Math.min(v.W-w-M,sx)); sy=Math.max(M,Math.min(v.H-h-M,sy));
     dock.style.transform='translate('+(v.ox+sx/v.sc)+'px,'+(v.oy+sy/v.sc)+'px)'+(v.sc!==1?' scale('+(1/v.sc)+')':'');
     dock._sx=sx; dock._sy=sy;
   }
+  setShape();
   if(vv){vv.addEventListener('resize',function(){placeDock();});vv.addEventListener('scroll',function(){placeDock();});}
   window.addEventListener('resize',function(){placeDock();}); window.addEventListener('orientationchange',function(){setTimeout(placeDock,300);});
   var grip=dock.querySelector('.grip');
   grip.addEventListener('pointerdown',function(e){e.preventDefault();try{grip.setPointerCapture(e.pointerId);}catch(err){}drag={x:e.clientX,y:e.clientY,sx:dock._sx||0,sy:dock._sy||0};dock.classList.add('dragging');});
   grip.addEventListener('pointermove',function(e){if(!drag)return;var sc=view().sc;placeDock(drag.sx+(e.clientX-drag.x)*sc,drag.sy+(e.clientY-drag.y)*sc);});
-  function dropDock(){if(!drag)return;drag=null;dock.classList.remove('dragging');var v=view();
-    pos={side:(dock._sx+dock.offsetWidth/2<v.W/2)?'l':'r',y:(dock._sy+dock.offsetHeight>=v.H-M-2)?-1:dock._sy};
-    try{localStorage.setItem('ppnote-dock',JSON.stringify(pos));}catch(err){} placeDock();}
+  function dropDock(){if(!drag)return;drag=null;dock.classList.remove('dragging');var v=view(),w=dock.offsetWidth,h=dock.offsetHeight;
+    var cx=dock._sx+w/2, cy=dock._sy+h/2, d={l:cx, r:v.W-cx, t:cy, b:v.H-cy};
+    var side=Object.keys(d).sort(function(a,b){return d[a]-d[b];})[0];
+    var before=dock.classList.contains('vert');
+    pos={side:side,at:(side==='l'||side==='r')?Math.max(0,cy-h/2):Math.max(0,cx-w/2)};
+    setShape();
+    if(dock.classList.contains('vert')!==before){ // 모양이 바뀌면 크기가 달라지므로 손을 놓은 자리 중심에 다시 맞춤
+      var w2=dock.offsetWidth,h2=dock.offsetHeight; pos.at=(side==='l'||side==='r')?Math.max(0,cy-h2/2):Math.max(0,cx-w2/2);}
+    try{localStorage.setItem('ppnote-dock2',JSON.stringify(pos));}catch(err){} placeDock();}
   grip.addEventListener('pointerup',dropDock); grip.addEventListener('pointercancel',dropDock);
   /* 글자 크기(화면 확대 대신) */
   var rz=1; try{rz=parseFloat(localStorage.getItem('ppnote-rz'))||1;}catch(e){}

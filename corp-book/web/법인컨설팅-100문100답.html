@@ -352,6 +352,16 @@ article.chap,.toc{zoom:var(--rz,1)}
 .gather .empty{color:var(--muted);font-size:13.5px;line-height:1.7;padding:12px 0}
 @media print{.dock,.gather,.myans>button{display:none!important}.ink{display:none}}
 
+/* 도구 창 세로 모양(화면 왼쪽·오른쪽 끝에 붙었을 때) */
+.dock.vert{display:flex;flex-direction:row;align-items:flex-start;gap:6px;max-height:calc(100vh - 24px);max-width:none}
+.dock.vert .row,.dock.vert .sub{flex-direction:column;flex-wrap:nowrap;align-items:center}
+.dock.vert .sep{width:auto;height:1px;align-self:stretch;margin:2px 4px}
+.dock.vert .sub{padding:2px 0;gap:6px}
+.dock.vert .swl{font-size:9.5px}
+.dock.vert label.tg{flex-direction:column;font-size:10px;text-align:center;max-width:44px}
+.dock.vert .hint,.dock.vert .store{display:none}
+.dock.vert.min{flex-direction:column}
+
 
 /* notes.js가 바에 붙이는 필기·글자 크기 버튼 */
 .bar #notesbtn,.bar .zseg button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:6px 10px;white-space:nowrap;cursor:pointer;min-height:34px}
@@ -14211,24 +14221,36 @@ VS
   showStore();
 
   /* 도구 창 위치: 화면(보이는 영역) 기준으로 고정, 확대해도 같은 크기 */
-  var vv=window.visualViewport, pos={side:'r',y:-1}, drag=null, M=12;
-  try{var ps=JSON.parse(localStorage.getItem('ppnote-dock')||'null');if(ps&&ps.side)pos=ps;}catch(e){}
+  /* 붙는 쪽에 따라 모양이 바뀜: 왼쪽·오른쪽 끝 → 세로, 위·아래 끝 → 가로 */
+  var vv=window.visualViewport, pos={side:'b',at:-1}, drag=null, M=12;
+  try{var ps=JSON.parse(localStorage.getItem('ppnote-dock2')||'null');if(ps&&ps.side)pos=ps;}catch(e){}
   function view(){var sc=vv?vv.scale:1;return {sc:sc,ox:vv?vv.offsetLeft:0,oy:vv?vv.offsetTop:0,W:vv?vv.width*sc:window.innerWidth,H:vv?vv.height*sc:window.innerHeight};}
+  function topGap(){var b=document.querySelector('.bar');var r=b?b.getBoundingClientRect():null;return r&&r.bottom>0?r.bottom+M:M;}
+  function setShape(){dock.classList.toggle('vert',pos.side==='l'||pos.side==='r');}
   function placeDock(fx,fy){
-    if(dock.hidden) return; var v=view(), w=dock.offsetWidth, h=dock.offsetHeight;
-    var sx=fx!=null?fx:(pos.side==='l'?M:v.W-w-M), sy=fy!=null?fy:(pos.y<0?v.H-h-M:pos.y);
+    if(dock.hidden) return; var v=view(), w=dock.offsetWidth, h=dock.offsetHeight, sx, sy;
+    if(fx!=null){sx=fx;sy=fy;}
+    else if(pos.side==='l'||pos.side==='r'){sx=pos.side==='l'?M:v.W-w-M; sy=pos.at<0?(v.H-h)/2:pos.at;}
+    else {sy=pos.side==='t'?topGap():v.H-h-M; sx=pos.at<0?v.W-w-M:pos.at;}
     sx=Math.max(M,Math.min(v.W-w-M,sx)); sy=Math.max(M,Math.min(v.H-h-M,sy));
     dock.style.transform='translate('+(v.ox+sx/v.sc)+'px,'+(v.oy+sy/v.sc)+'px)'+(v.sc!==1?' scale('+(1/v.sc)+')':'');
     dock._sx=sx; dock._sy=sy;
   }
+  setShape();
   if(vv){vv.addEventListener('resize',function(){placeDock();});vv.addEventListener('scroll',function(){placeDock();});}
   window.addEventListener('resize',function(){placeDock();}); window.addEventListener('orientationchange',function(){setTimeout(placeDock,300);});
   var grip=dock.querySelector('.grip');
   grip.addEventListener('pointerdown',function(e){e.preventDefault();try{grip.setPointerCapture(e.pointerId);}catch(err){}drag={x:e.clientX,y:e.clientY,sx:dock._sx||0,sy:dock._sy||0};dock.classList.add('dragging');});
   grip.addEventListener('pointermove',function(e){if(!drag)return;var sc=view().sc;placeDock(drag.sx+(e.clientX-drag.x)*sc,drag.sy+(e.clientY-drag.y)*sc);});
-  function dropDock(){if(!drag)return;drag=null;dock.classList.remove('dragging');var v=view();
-    pos={side:(dock._sx+dock.offsetWidth/2<v.W/2)?'l':'r',y:(dock._sy+dock.offsetHeight>=v.H-M-2)?-1:dock._sy};
-    try{localStorage.setItem('ppnote-dock',JSON.stringify(pos));}catch(err){} placeDock();}
+  function dropDock(){if(!drag)return;drag=null;dock.classList.remove('dragging');var v=view(),w=dock.offsetWidth,h=dock.offsetHeight;
+    var cx=dock._sx+w/2, cy=dock._sy+h/2, d={l:cx, r:v.W-cx, t:cy, b:v.H-cy};
+    var side=Object.keys(d).sort(function(a,b){return d[a]-d[b];})[0];
+    var before=dock.classList.contains('vert');
+    pos={side:side,at:(side==='l'||side==='r')?Math.max(0,cy-h/2):Math.max(0,cx-w/2)};
+    setShape();
+    if(dock.classList.contains('vert')!==before){ // 모양이 바뀌면 크기가 달라지므로 손을 놓은 자리 중심에 다시 맞춤
+      var w2=dock.offsetWidth,h2=dock.offsetHeight; pos.at=(side==='l'||side==='r')?Math.max(0,cy-h2/2):Math.max(0,cx-w2/2);}
+    try{localStorage.setItem('ppnote-dock2',JSON.stringify(pos));}catch(err){} placeDock();}
   grip.addEventListener('pointerup',dropDock); grip.addEventListener('pointercancel',dropDock);
   /* 글자 크기(화면 확대 대신) */
   var rz=1; try{rz=parseFloat(localStorage.getItem('ppnote-rz'))||1;}catch(e){}
@@ -14317,18 +14339,3 @@ VS
 })();
 </script>
 
-<script>
-/* 진단 줄: 펜슬 입력이 어디에 닿는지 도구 창 아래에 표시 (iPad 문제 확인용) */
-(function(){
-  function desc(el){ if(!el||!el.tagName) return "없음"; var c=(el.getAttribute&&el.getAttribute("class"))||""; return el.tagName.toLowerCase()+(c?"."+String(c).split(" ").slice(0,2).join("."):""); }
-  var line=null, last={};
-  function ensure(){ var d=document.querySelector(".dock"); if(!d) return null; if(!line){ line=document.createElement("div"); line.id="diag"; line.style.cssText="font:11px/1.45 monospace;color:var(--muted);padding:2px 4px;max-width:330px;word-break:break-all"; d.appendChild(line);} return line; }
-  function show(){ var l=ensure(); if(!l) return; var b=document.body.className.match(/tool-\w+/); var nInk=document.querySelectorAll("svg.ink").length, nOn=document.querySelectorAll("svg.ink path").length;
-    l.textContent="진단 · 도구 "+(b?b[0].slice(5):"없음")+" · 입력 "+(last.type||"-")+"/"+(last.pt||"-")+(last.tt?"/"+last.tt:"")+" · 닿은 곳 "+(last.tg||"-")+" · 층 "+nInk+" · 획 "+nOn+(last.pc?" · 취소됨":""); }
-  document.addEventListener("pointerdown",function(e){ last={type:"down",pt:e.pointerType,tg:desc(e.target),pc:false}; show(); },true);
-  document.addEventListener("pointercancel",function(e){ last.pc=true; show(); },true);
-  document.addEventListener("pointerup",function(){ setTimeout(show,50); },true);
-  document.addEventListener("touchstart",function(e){ var t=e.touches[0]; if(t) last.tt=t.touchType||"?"; },{capture:true,passive:true});
-  setInterval(function(){ if(document.querySelector(".dock:not([hidden])")) show(); },1500);
-})();
-</script>
