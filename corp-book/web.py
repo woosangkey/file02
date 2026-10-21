@@ -44,7 +44,7 @@ def notes_assets():
          "var BLOCKS='.intro p, .intro li, .qhead h3, .qbody p, .qbody li, .qbody td, .qbody h4, .caption';"),
         ("function sid(sec){return sec.id.split('-').slice(1).join('-')||'x';}", "function sid(sec){return sec.id;}"),
         ("section.page", "section.qsec"),
-        ("a.querySelectorAll('.qa > div')", "a.querySelectorAll('section.qsec')"),
+        ("a.querySelectorAll('.qa > div')", "a.querySelectorAll('section.qsec:not(.intro-sec)')"),
         ("q:(q.querySelector('.q')||{}).textContent||''", "q:(q.querySelector('.q, .qhead h3')||{}).textContent||''"),
         ("ta.placeholder='먼저 스스로 답해 보세요. 그다음 아래 해설을 읽습니다.';",
          "ta.placeholder='이 질문에 대한 내 생각, 고객 사례, 다음에 물어볼 것을 적어 두세요.';"),
@@ -95,7 +95,7 @@ def main():
                 f'<header class="ch-open"><div class="chno">{html.escape(pl)} · {n}장</div>'
                 f'<div class="frame"><span class="tag">들어가기 전에</span><h2>{emph(c["meta"].get("open", c["meta"]["title"]))}</h2></div>'
                 f'<p class="chtitle">{html.escape(c["meta"]["title"])} · Q{first_q:03d}–{last_q:03d}</p></header>'
-                f'<div class="intro">{intro}</div>{"".join(qs_html)}'
+                f'<section class="qsec intro intro-sec" id="c{cid}-intro">{intro}</section>{"".join(qs_html)}'
                 f'<nav class="chapnav" aria-label="장 이동"></nav></article>')
             nav.append(f'<optgroup label="{n}장 {html.escape(c["meta"]["title"])}">{"".join(opts)}</optgroup>')
             rows.append(
