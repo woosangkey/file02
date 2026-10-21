@@ -1,0 +1,6 @@
+{
+  "name": "study-annotation",
+  "description": "교재·스터디북 HTML에 아이패드 펜슬용 필기 도구(형광펜·만년필·볼펜·지우개·내 답·글자 크기)를 붙이는 스킬",
+  "version": "1.2.0",
+  "author": { "name": "woosangkey" }
+}

@@ -30,7 +30,7 @@ def plain(h):
     return re.sub(r"\s+", " ", html.unescape(t)).strip()
 
 
-SKILL = os.path.join(ROOT, "..", ".claude", "skills", "study-annotation", "assets")
+SKILL = os.path.join(ROOT, "..", "plugins", "study-annotation", "skills", "study-annotation", "assets")
 
 
 def notes_assets():

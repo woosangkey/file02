@@ -172,3 +172,13 @@
 
 ※ 도서 목록·분류 출처: 「2021 우량 투자서 35선」(도서 나열은 선정단 평점순).
 ※ 본 노트는 학습용 요약·해설이며, 원문의 긴 인용 대신 의역과 개념 정리로 구성했습니다. 세부 수치는 원서로 확인하세요.
+
+## 필기 도구 스킬 (study-annotation) — 어디서나 쓰기
+
+교재·스터디북 HTML에 아이패드 펜슬용 필기 도구를 붙이는 스킬. 원본: `plugins/study-annotation/skills/study-annotation/`
+
+| 쓰는 곳 | 방법 |
+|---|---|
+| claude.ai · Claude Code 웹/클라우드 · 같은 계정으로 로그인한 Claude Code CLI | `study-annotation.zip`을 claude.ai **Customize → Skills → + → Create skill → Upload a skill**로 올림 (한 번만) |
+| 다른 컴퓨터의 Claude Code CLI | `/plugin marketplace add woosangkey/file02#claude/recommended-books-study-guide-wa6wbw` 후 `/plugin install study-annotation@woosangkey-skills` |
+| 이 저장소에서 연 세션 | 자동 (`.claude/skills/study-annotation` → 원본 연결) |
